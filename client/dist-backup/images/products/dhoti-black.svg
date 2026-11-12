@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" >
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#000000"/>
+        <stop offset="0.55" stop-color="#0c1732"/>
+        <stop offset="1" stop-color="#060b19"/>
+      </linearGradient>
+      <linearGradient id="cloth-21" x1="0" y1="0" x2="0.4" y2="1">
+        <stop offset="0" stop-color="#29292f"/>
+        <stop offset="0.6" stop-color="#17171d"/>
+        <stop offset="1" stop-color="#000000"/>
+      </linearGradient>
+      <radialGradient id="halo-21" cx="0.5" cy="0.45" r="0.55">
+        <stop offset="0" stop-color="#c7a753" stop-opacity="0.28"/>
+        <stop offset="1" stop-color="#c7a753" stop-opacity="0"/>
+      </radialGradient>
+      <pattern id="motif-21" width="40" height="14" patternUnits="userSpaceOnUse">
+    <path d="M0 3h40M0 10h40" stroke="#c7a753" stroke-width="1" opacity="0.1" fill="none"/>
+  </pattern>
+      <clipPath id="clip-21"><path d="M292 330 L508 330 L556 882 L300 882Z"/></clipPath>
+    </defs>
+    <rect width="800" height="1000" fill="url(#bg)"/>
+    <rect width="800" height="1000" fill="url(#motif-21)" opacity="0.55"/>
+    <circle cx="400" cy="470" r="360" fill="url(#halo-21)"/>
+    <ellipse cx="400" cy="905" rx="210" ry="26" fill="#000000" opacity="0.35"/>
+    <path d="M292 330 L508 330 L556 882 L300 882Z" fill="url(#cloth-21)" stroke="#c7a753" stroke-opacity="0.55" stroke-width="2.4"/>
+    <g clip-path="url(#clip-21)">
+      <rect x="200" y="150" width="400" height="800" fill="url(#motif-21)" opacity="0.5"/>
+      <path d="M385 360 C373 520 401 680 381 852" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M407 360 C395 520 423 680 403 852" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M407 360 C395 520 423 680 403 852" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M442 360 C430 520 458 680 438 852" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M362 360 C350 520 378 680 358 852" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/>
+      <rect x="200" y="732" width="400" height="150" fill="#000000" opacity="0.16"/>
+    </g>
+    <rect x="286" y="304" width="228" height="34" rx="6" fill="#9f7f2b" opacity="0.7"/><path d="M330 344 C318 520 340 700 322 870" fill="none" stroke="#c7a753" stroke-width="1.8" opacity="0.28"/><path d="M378 344 C366 520 388 700 370 870" fill="none" stroke="#c7a753" stroke-width="1.8" opacity="0.28"/><path d="M426 344 C414 520 436 700 418 870" fill="none" stroke="#c7a753" stroke-width="1.8" opacity="0.28"/><path d="M474 344 C462 520 484 700 466 870" fill="none" stroke="#c7a753" stroke-width="1.8" opacity="0.28"/><path d="M296 840 L556 840" stroke="#c7a753" stroke-width="10" opacity="0.75"/>
+    <g transform="translate(400 948)" opacity="0.55">
+      <circle r="24" fill="none" stroke="#c7a753" stroke-width="1.2"/>
+      <text text-anchor="middle" y="8" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#c7a753">R</text>
+    </g>
+    <rect x="28" y="28" width="744" height="944" fill="none" stroke="#c7a753" stroke-opacity="0.18"/>
+    </svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" >
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#8d836e"/>
+        <stop offset="0.55" stop-color="#0c1732"/>
+        <stop offset="1" stop-color="#060b19"/>
+      </linearGradient>
+      <linearGradient id="cloth-1" x1="0" y1="0" x2="0.4" y2="1">
+        <stop offset="0" stop-color="#f5ebd6"/>
+        <stop offset="0.6" stop-color="#e3d9c4"/>
+        <stop offset="1" stop-color="#b3a994"/>
+      </linearGradient>
+      <radialGradient id="halo-1" cx="0.5" cy="0.45" r="0.55">
+        <stop offset="0" stop-color="#b2924f" stop-opacity="0.28"/>
+        <stop offset="1" stop-color="#b2924f" stop-opacity="0"/>
+      </radialGradient>
+      <pattern id="motif-1" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#b2924f" stroke-width="1.6" opacity="0.1">
+        <path d="M34 66c-14 0-20-10-20-19 0-12 12-19 22-13 8 5 5 17-4 17-6 0-8-6-4-9"/>
+        <circle cx="66" cy="30" r="4"/>
+        <path d="M60 76c10-2 16-9 16-18"/>
+      </g>
+    </pattern>
+      <clipPath id="clip-1"><path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L318 836 L482 836 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z"/></clipPath>
+    </defs>
+    <rect width="800" height="1000" fill="url(#bg)"/>
+    <rect width="800" height="1000" fill="url(#motif-1)" opacity="0.55"/>
+    <circle cx="400" cy="470" r="360" fill="url(#halo-1)"/>
+    <ellipse cx="400" cy="905" rx="210" ry="26" fill="#000000" opacity="0.35"/>
+    <path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L318 836 L482 836 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z" fill="url(#cloth-1)" stroke="#b2924f" stroke-opacity="0.55" stroke-width="2.4"/>
+    <g clip-path="url(#clip-1)">
+      <rect x="200" y="150" width="400" height="800" fill="url(#motif-1)" opacity="0.5"/>
+      <path d="M362 360 C350 520 378 680 358 806" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M431 360 C419 520 447 680 427 806" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M332 360 C320 520 348 680 328 806" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M357 360 C345 520 373 680 353 806" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M455 360 C443 520 471 680 451 806" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/>
+      <rect x="200" y="686" width="400" height="150" fill="#000000" opacity="0.16"/>
+    </g>
+    <path d="M362 218 C372 190 428 190 438 218" fill="none" stroke="#b2924f" stroke-width="3" opacity="0.85"/><path d="M400 236 L400 796" stroke="#b2924f" stroke-width="1.8" opacity="0.6"/><circle cx="400" cy="310" r="3.6" fill="#b2924f" opacity="0.75"/><circle cx="400" cy="430" r="3.6" fill="#b2924f" opacity="0.75"/><circle cx="400" cy="550" r="3.6" fill="#b2924f" opacity="0.75"/><circle cx="400" cy="670" r="3.6" fill="#b2924f" opacity="0.75"/><path d="M292 392 L286 838 M508 392 L514 838" stroke="#b2924f" stroke-width="1.2" opacity="0.25"/>
+    <g transform="translate(400 948)" opacity="0.55">
+      <circle r="24" fill="none" stroke="#b2924f" stroke-width="1.2"/>
+      <text text-anchor="middle" y="8" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#b2924f">R</text>
+    </g>
+    <rect x="28" y="28" width="744" height="944" fill="none" stroke="#b2924f" stroke-opacity="0.18"/>
+    </svg>

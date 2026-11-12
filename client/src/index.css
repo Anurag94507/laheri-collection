@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface font-sans text-ink antialiased;
+    font-size: 16px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-semibold tracking-tight text-navy;
+  }
+
+  ::selection {
+    background: #c9a84c;
+    color: #0f1b3c;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.3em] text-gold;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-gold {
+    @apply btn bg-gold text-navy shadow-[0_10px_30px_-16px_rgba(201,168,76,0.9)] hover:bg-gold-light hover:shadow-[0_16px_34px_-14px_rgba(201,168,76,0.85)] active:translate-y-px;
+  }
+
+  .btn-navy {
+    @apply btn bg-navy text-surface hover:bg-navy-800;
+  }
+
+  .btn-outline {
+    @apply btn border border-navy/20 bg-transparent text-navy hover:border-navy hover:bg-navy hover:text-surface;
+  }
+
+  .btn-ghost-light {
+    @apply btn border border-parchment/40 text-surface hover:border-gold hover:bg-gold hover:text-navy;
+  }
+
+  .btn-sm {
+    @apply rounded-full px-4 py-2 text-xs;
+  }
+
+  .card {
+    @apply rounded-2xl bg-white shadow-soft;
+    border: 1px solid rgba(15, 27, 60, 0.1);
+  }
+
+  .input {
+    @apply w-full rounded-xl bg-white px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink/35 focus:border-gold focus:ring-4 focus:ring-gold/15;
+  }
+
+  .label {
+    @apply mb-1.5 block text-[12px] font-medium uppercase tracking-[0.12em] text-navy/60;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border bg-white px-3 py-1 text-xs font-medium text-navy/70 transition hover:border-gold hover:text-navy;
+  }
+
+  .chip-active {
+    @apply border-gold bg-gold/15 text-navy;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em];
+  }
+
+  .link-underline {
+    @apply relative after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-gold after:transition-all after:duration-300 hover:after:w-full;
+  }
+
+  .hairline {
+    @apply border-t;
+    border-color: rgba(15, 27, 60, 0.1);
+  }
+
+  .card-lift {
+    @apply transition duration-500 hover:-translate-y-1 hover:shadow-lift;
+  }
+
+  .shimmer-text {
+    background: linear-gradient(100deg, #e8d5a3 10%, #fff8df 30%, #c9a84c 50%, #e8d5a3 70%);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 8s linear infinite;
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-input {
+    @apply w-full rounded-lg bg-white px-3 py-2 text-sm text-ink outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20;
+  }
+
+  .admin-label {
+    @apply mb-1 block text-[11px] font-semibold uppercase tracking-[0.14em] text-navy/55;
+  }
+
+  .admin-card {
+    @apply rounded-xl bg-white p-5 shadow-[0_10px_30px_-24px_rgba(15,27,60,0.45)];
+  }
+}
+
+/* Decorative helpers */
+.texture-indigo {
+  background-color: #0f1b3c;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(201, 168, 76, 0.14), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(232, 213, 163, 0.1), transparent 40%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 12px);
+}
+
+.festive-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.55), transparent);
+}
+
+.lift-on-hover {
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.4s ease;
+}
+
+.lift-on-hover:hover {
+  transform: translateY(-4px);
+}
+
+/* Bill printing */
+@media print {
+  body {
+    background: #fff;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #print-bill,
+  #print-bill * {
+    visibility: visible;
+  }
+
+  #print-bill {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    width: 100%;
+    max-height: none;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

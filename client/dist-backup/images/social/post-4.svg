@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" ><defs>
+        <linearGradient id="s3" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#000309"/>
+          <stop offset="1" stop-color="#000000"/>
+        </linearGradient>
+        <radialGradient id="sg3" cx="0.5" cy="0.4" r="0.6">
+          <stop offset="0" stop-color="#c9a84c" stop-opacity="0.32"/>
+          <stop offset="1" stop-color="#c9a84c" stop-opacity="0"/>
+        </radialGradient>
+        <pattern id="sp-3" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#c9a84c" stroke-width="1.6" opacity="0.14">
+        <path d="M34 66c-14 0-20-10-20-19 0-12 12-19 22-13 8 5 5 17-4 17-6 0-8-6-4-9"/>
+        <circle cx="66" cy="30" r="4"/>
+        <path d="M60 76c10-2 16-9 16-18"/>
+      </g>
+    </pattern>
+        <clipPath id="sc-3"><path d="M400 210 C382 210 366 216 352 224 L306 240 L250 372 L300 404 L338 330 L330 806 L470 806 L462 330 L500 404 L550 372 L494 240 L448 224 C434 216 418 210 400 210 Z"/></clipPath>
+      </defs>
+      <rect width="800" height="800" fill="url(#s3)"/>
+      <rect width="800" height="800" fill="url(#sp-3)" opacity="0.6"/>
+      <circle cx="400" cy="390" r="330" fill="url(#sg3)"/>
+      <g transform="translate(0 -90) scale(0.82) translate(88 60)">
+        <path d="M400 210 C382 210 366 216 352 224 L306 240 L250 372 L300 404 L338 330 L330 806 L470 806 L462 330 L500 404 L550 372 L494 240 L448 224 C434 216 418 210 400 210 Z" fill="#40454b" stroke="#c9a84c" stroke-opacity="0.6" stroke-width="3"/>
+        <g clip-path="url(#sc-3)"><rect width="800" height="1000" fill="url(#sp-3)" opacity="0.55"/></g>
+      </g>
+      <rect x="26" y="26" width="748" height="748" fill="none" stroke="#c9a84c" stroke-opacity="0.3"/>
+      <text x="400" y="742" text-anchor="middle" font-family="Georgia, serif" font-size="20" letter-spacing="10" fill="#c9a84c" opacity="0.65">RAJA MENSWEAR</text></svg>

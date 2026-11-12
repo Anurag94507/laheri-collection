@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" ><defs>
+    <linearGradient id="hbg" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#101f42"/>
+      <stop offset="0.5" stop-color="#0a1430"/>
+      <stop offset="1" stop-color="#050a17"/>
+    </linearGradient>
+    <radialGradient id="hglow" cx="0.62" cy="0.34" r="0.55">
+      <stop offset="0" stop-color="#c9a84c" stop-opacity="0.36"/>
+      <stop offset="1" stop-color="#c9a84c" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="hpat" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#c9a84c" stroke-width="1.6" opacity="0.12">
+        <path d="M34 66c-14 0-20-10-20-19 0-12 12-19 22-13 8 5 5 17-4 17-6 0-8-6-4-9"/>
+        <circle cx="66" cy="30" r="4"/>
+        <path d="M60 76c10-2 16-9 16-18"/>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#hbg)"/>
+  <rect width="1600" height="1000" fill="url(#hpat)" opacity="0.7"/>
+  <circle cx="980" cy="360" r="520" fill="url(#hglow)"/>
+  <g stroke="#c9a84c" fill="none" opacity="0.28">
+    <path d="M120 1000 V420 a180 180 0 0 1 360 0 V1000" stroke-width="2"/>
+    <path d="M1180 1000 V470 a150 150 0 0 1 300 0 V1000" stroke-width="1.6"/>
+    <path d="M0 250 H1600" stroke-width="1.2"/>
+  </g>
+  <g stroke="#d8bb6a" stroke-width="6" stroke-linecap="round" opacity="0.55">
+    <path d="M80 300 H1520"/>
+  </g>
+  <g fill="#d8bb6a" opacity="0.5">
+    <path d="M210 300 v-42 a18 18 0 0 1 36 0 v42" fill="none" stroke="#d8bb6a" stroke-width="3"/><path d="M490 300 v-42 a18 18 0 0 1 36 0 v42" fill="none" stroke="#d8bb6a" stroke-width="3"/><path d="M790 300 v-42 a18 18 0 0 1 36 0 v42" fill="none" stroke="#d8bb6a" stroke-width="3"/><path d="M1060 300 v-42 a18 18 0 0 1 36 0 v42" fill="none" stroke="#d8bb6a" stroke-width="3"/><path d="M1330 300 v-42 a18 18 0 0 1 36 0 v42" fill="none" stroke="#d8bb6a" stroke-width="3"/>
+  </g>
+  <g transform="translate(150 300) scale(0.6579999999999999) translate(-120 -60)">
+      <defs><pattern id="hm-0" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#d8bb6a" stroke-width="1.6" opacity="0.16">
+        <path d="M34 66c-14 0-20-10-20-19 0-12 12-19 22-13 8 5 5 17-4 17-6 0-8-6-4-9"/>
+        <circle cx="66" cy="30" r="4"/>
+        <path d="M60 76c10-2 16-9 16-18"/>
+      </g>
+    </pattern><clipPath id="hc-0"><path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L318 836 L482 836 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z"/></clipPath></defs>
+      <path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L318 836 L482 836 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z" fill="#1c2f5c" stroke="#d8bb6a" stroke-opacity="0.5" stroke-width="3"/>
+      <g clip-path="url(#hc-0)"><rect width="800" height="1000" fill="url(#hm-0)" opacity="0.6"/></g>
+      <path d="M400 208 L400 300" stroke="#d8bb6a" stroke-opacity="0.55" stroke-width="2"/>
+    </g><g transform="translate(430 300) scale(0.742) translate(-120 -60)">
+      <defs><pattern id="hm-1" width="72" height="72" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#e3c67f" stroke-width="1.3" opacity="0.16">
+        <path d="M36 8 64 36 36 64 8 36Z"/>
+        <circle cx="36" cy="36" r="6"/>
+        <path d="M36 18v-6M36 60v-6M18 36h-6M60 36h-6"/>
+      </g>
+    </pattern><clipPath id="hc-1"><path d="M400 206 C378 206 356 212 340 220 L296 236 L232 372 L286 410 L326 330 L312 886 L488 886 L474 330 L514 410 L568 372 L504 236 L460 220 C444 212 422 206 400 206 Z"/></clipPath></defs>
+      <path d="M400 206 C378 206 356 212 340 220 L296 236 L232 372 L286 410 L326 330 L312 886 L488 886 L474 330 L514 410 L568 372 L504 236 L460 220 C444 212 422 206 400 206 Z" fill="#5a1d26" stroke="#e3c67f" stroke-opacity="0.5" stroke-width="3"/>
+      <g clip-path="url(#hc-1)"><rect width="800" height="1000" fill="url(#hm-1)" opacity="0.6"/></g>
+      <path d="M400 208 L400 300" stroke="#e3c67f" stroke-opacity="0.55" stroke-width="2"/>
+    </g><g transform="translate(730 300) scale(0.616) translate(-120 -60)">
+      <defs><pattern id="hm-2" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#8a6b32" stroke-width="1.6" opacity="0.16">
+        <path d="M34 66c-14 0-20-10-20-19 0-12 12-19 22-13 8 5 5 17-4 17-6 0-8-6-4-9"/>
+        <circle cx="66" cy="30" r="4"/>
+        <path d="M60 76c10-2 16-9 16-18"/>
+      </g>
+    </pattern><clipPath id="hc-2"><path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L318 836 L482 836 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z"/></clipPath></defs>
+      <path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L318 836 L482 836 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z" fill="#c9bfa6" stroke="#8a6b32" stroke-opacity="0.5" stroke-width="3"/>
+      <g clip-path="url(#hc-2)"><rect width="800" height="1000" fill="url(#hm-2)" opacity="0.6"/></g>
+      <path d="M400 208 L400 300" stroke="#8a6b32" stroke-opacity="0.55" stroke-width="2"/>
+    </g><g transform="translate(1000 300) scale(0.7) translate(-120 -60)">
+      <defs><pattern id="hm-3" width="72" height="72" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#d8bb6a" stroke-width="1.3" opacity="0.16">
+        <path d="M36 8 64 36 36 64 8 36Z"/>
+        <circle cx="36" cy="36" r="6"/>
+        <path d="M36 18v-6M36 60v-6M18 36h-6M60 36h-6"/>
+      </g>
+    </pattern><clipPath id="hc-3"><path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L316 846 L484 846 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z"/></clipPath></defs>
+      <path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L316 846 L484 846 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z" fill="#22392f" stroke="#d8bb6a" stroke-opacity="0.5" stroke-width="3"/>
+      <g clip-path="url(#hc-3)"><rect width="800" height="1000" fill="url(#hm-3)" opacity="0.6"/></g>
+      <path d="M400 208 L400 300" stroke="#d8bb6a" stroke-opacity="0.55" stroke-width="2"/>
+    </g><g transform="translate(1270 300) scale(0.63) translate(-120 -60)">
+      <defs><pattern id="hm-4" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#c9a84c" stroke-width="1.6" opacity="0.16">
+        <path d="M34 66c-14 0-20-10-20-19 0-12 12-19 22-13 8 5 5 17-4 17-6 0-8-6-4-9"/>
+        <circle cx="66" cy="30" r="4"/>
+        <path d="M60 76c10-2 16-9 16-18"/>
+      </g>
+    </pattern><clipPath id="hc-4"><path d="M400 210 C382 210 366 216 352 224 L306 240 L250 372 L300 404 L338 330 L330 806 L470 806 L462 330 L500 404 L550 372 L494 240 L448 224 C434 216 418 210 400 210 Z"/></clipPath></defs>
+      <path d="M400 210 C382 210 366 216 352 224 L306 240 L250 372 L300 404 L338 330 L330 806 L470 806 L462 330 L500 404 L550 372 L494 240 L448 224 C434 216 418 210 400 210 Z" fill="#2b3a45" stroke="#c9a84c" stroke-opacity="0.5" stroke-width="3"/>
+      <g clip-path="url(#hc-4)"><rect width="800" height="1000" fill="url(#hm-4)" opacity="0.6"/></g>
+      <path d="M400 208 L400 300" stroke="#c9a84c" stroke-opacity="0.55" stroke-width="2"/>
+    </g>
+  <g opacity="0.6">
+    <g transform="translate(120 860)">
+            <rect width="220" height="34" rx="8" fill="#1d3268" opacity="0.9"/>
+            <rect y="34" width="220" height="34" rx="8" fill="#243a63" opacity="0.8"/>
+            <rect y="68" width="220" height="34" rx="8" fill="#16264f" opacity="0.7"/>
+            <path d="M0 20 H220M0 54 H220M0 88 H220" stroke="#c9a84c" stroke-opacity="0.15" stroke-width="2"/>
+          </g><g transform="translate(190 844)">
+            <rect width="220" height="34" rx="8" fill="#5a1d26" opacity="0.9"/>
+            <rect y="34" width="220" height="34" rx="8" fill="#6b2430" opacity="0.8"/>
+            <rect y="68" width="220" height="34" rx="8" fill="#4d1a23" opacity="0.7"/>
+            <path d="M0 20 H220M0 54 H220M0 88 H220" stroke="#c9a84c" stroke-opacity="0.15" stroke-width="2"/>
+          </g><g transform="translate(260 828)">
+            <rect width="220" height="34" rx="8" fill="#d9cfb6" opacity="0.9"/>
+            <rect y="34" width="220" height="34" rx="8" fill="#cabfa4" opacity="0.8"/>
+            <rect y="68" width="220" height="34" rx="8" fill="#e2d8c0" opacity="0.7"/>
+            <path d="M0 20 H220M0 54 H220M0 88 H220" stroke="#c9a84c" stroke-opacity="0.15" stroke-width="2"/>
+          </g><g transform="translate(330 812)">
+            <rect width="220" height="34" rx="8" fill="#4e5b3c" opacity="0.9"/>
+            <rect y="34" width="220" height="34" rx="8" fill="#5c6b4f" opacity="0.8"/>
+            <rect y="68" width="220" height="34" rx="8" fill="#3f4b34" opacity="0.7"/>
+            <path d="M0 20 H220M0 54 H220M0 88 H220" stroke="#c9a84c" stroke-opacity="0.15" stroke-width="2"/>
+          </g>
+  </g>
+  <g fill="#e8d5a3" opacity="0.5">
+    <circle cx="1320" cy="200" r="3"/><circle cx="1180" cy="300" r="2"/><circle cx="1420" cy="420" r="2.4"/>
+    <circle cx="880" cy="160" r="2"/><circle cx="760" cy="240" r="1.8"/>
+  </g>
+  <rect width="1600" height="1000" fill="url(#hbg)" opacity="0.18"/>
+  </svg>

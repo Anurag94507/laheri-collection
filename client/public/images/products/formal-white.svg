@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" >
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#93918b"/>
+        <stop offset="0.55" stop-color="#0c1732"/>
+        <stop offset="1" stop-color="#060b19"/>
+      </linearGradient>
+      <linearGradient id="cloth-10" x1="0" y1="0" x2="0.4" y2="1">
+        <stop offset="0" stop-color="#fbf9f3"/>
+        <stop offset="0.6" stop-color="#e9e7e1"/>
+        <stop offset="1" stop-color="#b9b7b1"/>
+      </linearGradient>
+      <radialGradient id="halo-10" cx="0.5" cy="0.45" r="0.55">
+        <stop offset="0" stop-color="#b9b2a1" stop-opacity="0.28"/>
+        <stop offset="1" stop-color="#b9b2a1" stop-opacity="0"/>
+      </radialGradient>
+      <pattern id="motif-10" width="26" height="26" patternUnits="userSpaceOnUse">
+      <path d="M-6 26 26 -6M6 32 38 0" stroke="#b9b2a1" stroke-width="1.4" opacity="0.1" fill="none"/>
+    </pattern>
+      <clipPath id="clip-10"><path d="M400 210 C382 210 366 216 352 224 L306 240 L250 372 L300 404 L338 330 L330 806 L470 806 L462 330 L500 404 L550 372 L494 240 L448 224 C434 216 418 210 400 210 Z"/></clipPath>
+    </defs>
+    <rect width="800" height="1000" fill="url(#bg)"/>
+    <rect width="800" height="1000" fill="url(#motif-10)" opacity="0.55"/>
+    <circle cx="400" cy="470" r="360" fill="url(#halo-10)"/>
+    <ellipse cx="400" cy="905" rx="210" ry="26" fill="#000000" opacity="0.35"/>
+    <path d="M400 210 C382 210 366 216 352 224 L306 240 L250 372 L300 404 L338 330 L330 806 L470 806 L462 330 L500 404 L550 372 L494 240 L448 224 C434 216 418 210 400 210 Z" fill="url(#cloth-10)" stroke="#b9b2a1" stroke-opacity="0.55" stroke-width="2.4"/>
+    <g clip-path="url(#clip-10)">
+      <rect x="200" y="150" width="400" height="800" fill="url(#motif-10)" opacity="0.5"/>
+      <path d="M424 360 C412 520 440 680 420 776" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M398 360 C386 520 414 680 394 776" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M387 360 C375 520 403 680 383 776" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M342 360 C330 520 358 680 338 776" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M413 360 C401 520 429 680 409 776" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/>
+      <rect x="200" y="656" width="400" height="150" fill="#000000" opacity="0.16"/>
+    </g>
+    <path d="M360 218 L400 272 L440 218" fill="none" stroke="#b9b2a1" stroke-width="2.4" opacity="0.8"/><path d="M400 268 L400 782" stroke="#b9b2a1" stroke-width="1.8" opacity="0.55"/><circle cx="400" cy="318" r="3.4" fill="#b9b2a1" opacity="0.8"/><circle cx="400" cy="414" r="3.4" fill="#b9b2a1" opacity="0.8"/><circle cx="400" cy="510" r="3.4" fill="#b9b2a1" opacity="0.8"/><circle cx="400" cy="606" r="3.4" fill="#b9b2a1" opacity="0.8"/><circle cx="400" cy="702" r="3.4" fill="#b9b2a1" opacity="0.8"/><rect x="330" y="372" width="42" height="52" rx="4" fill="none" stroke="#b9b2a1" stroke-width="1.6" opacity="0.35"/>
+    <g transform="translate(400 948)" opacity="0.55">
+      <circle r="24" fill="none" stroke="#b9b2a1" stroke-width="1.2"/>
+      <text text-anchor="middle" y="8" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#b9b2a1">R</text>
+    </g>
+    <rect x="28" y="28" width="744" height="944" fill="none" stroke="#b9b2a1" stroke-opacity="0.18"/>
+    </svg>

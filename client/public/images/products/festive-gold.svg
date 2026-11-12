@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" >
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#532e00"/>
+        <stop offset="0.55" stop-color="#0c1732"/>
+        <stop offset="1" stop-color="#060b19"/>
+      </linearGradient>
+      <linearGradient id="cloth-18" x1="0" y1="0" x2="0.4" y2="1">
+        <stop offset="0" stop-color="#bb964e"/>
+        <stop offset="0.6" stop-color="#a9843c"/>
+        <stop offset="1" stop-color="#79540c"/>
+      </linearGradient>
+      <radialGradient id="halo-18" cx="0.5" cy="0.45" r="0.55">
+        <stop offset="0" stop-color="#f0e0b4" stop-opacity="0.28"/>
+        <stop offset="1" stop-color="#f0e0b4" stop-opacity="0"/>
+      </radialGradient>
+      <pattern id="motif-18" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#f0e0b4" stroke-width="1.6" opacity="0.1">
+        <path d="M34 66c-14 0-20-10-20-19 0-12 12-19 22-13 8 5 5 17-4 17-6 0-8-6-4-9"/>
+        <circle cx="66" cy="30" r="4"/>
+        <path d="M60 76c10-2 16-9 16-18"/>
+      </g>
+    </pattern>
+      <clipPath id="clip-18"><path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L316 846 L484 846 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z"/></clipPath>
+    </defs>
+    <rect width="800" height="1000" fill="url(#bg)"/>
+    <rect width="800" height="1000" fill="url(#motif-18)" opacity="0.55"/>
+    <circle cx="400" cy="470" r="360" fill="url(#halo-18)"/>
+    <ellipse cx="400" cy="905" rx="210" ry="26" fill="#000000" opacity="0.35"/>
+    <path d="M400 208 C378 208 360 214 344 222 L300 238 L238 352 L292 392 L330 322 L316 846 L484 846 L470 322 L508 392 L562 352 L500 238 L456 222 C440 214 422 208 400 208 Z" fill="url(#cloth-18)" stroke="#f0e0b4" stroke-opacity="0.55" stroke-width="2.4"/>
+    <g clip-path="url(#clip-18)">
+      <rect x="200" y="150" width="400" height="800" fill="url(#motif-18)" opacity="0.5"/>
+      <path d="M379 360 C367 520 395 680 375 816" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M417 360 C405 520 433 680 413 816" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M362 360 C350 520 378 680 358 816" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M332 360 C320 520 348 680 328 816" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/><path d="M361 360 C349 520 377 680 357 816" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="8"/>
+      <rect x="200" y="696" width="400" height="150" fill="#000000" opacity="0.16"/>
+    </g>
+    <path d="M362 218 C372 190 428 190 438 218" fill="none" stroke="#f0e0b4" stroke-width="3" opacity="0.85"/><path d="M400 236 L400 806" stroke="#f0e0b4" stroke-width="1.8" opacity="0.6"/><circle cx="400" cy="310" r="3.6" fill="#f0e0b4" opacity="0.75"/><circle cx="400" cy="430" r="3.6" fill="#f0e0b4" opacity="0.75"/><circle cx="400" cy="550" r="3.6" fill="#f0e0b4" opacity="0.75"/><circle cx="400" cy="670" r="3.6" fill="#f0e0b4" opacity="0.75"/><rect x="316" y="806" width="168" height="34" fill="none" stroke="#f0e0b4" stroke-width="3" opacity="0.8"/><circle cx="336" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><circle cx="352" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><circle cx="368" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><circle cx="384" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><circle cx="400" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><circle cx="416" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><circle cx="432" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><circle cx="448" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><circle cx="464" cy="823" r="2.4" fill="#f0e0b4" opacity="0.8"/><path d="M300 790 l8 12 -8 12 -8 -12Z" fill="#f0e0b4" opacity="0.5"/><path d="M500 790 l8 12 -8 12 -8 -12Z" fill="#f0e0b4" opacity="0.5"/><path d="M292 392 L286 838 M508 392 L514 838" stroke="#f0e0b4" stroke-width="1.2" opacity="0.25"/>
+    <g transform="translate(400 948)" opacity="0.55">
+      <circle r="24" fill="none" stroke="#f0e0b4" stroke-width="1.2"/>
+      <text text-anchor="middle" y="8" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#f0e0b4">R</text>
+    </g>
+    <rect x="28" y="28" width="744" height="944" fill="none" stroke="#f0e0b4" stroke-opacity="0.18"/>
+    </svg>

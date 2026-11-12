@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" width="900" height="900" ><defs>
+      <linearGradient id="pbg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#14264e"/>
+        <stop offset="0.6" stop-color="#0c1730"/>
+        <stop offset="1" stop-color="#060c1a"/>
+      </linearGradient>
+      <radialGradient id="pglow" cx="0.5" cy="0.4" r="0.6">
+        <stop offset="0" stop-color="#c9a84c" stop-opacity="0.4"/>
+        <stop offset="1" stop-color="#c9a84c" stop-opacity="0"/>
+      </radialGradient>
+      <pattern id="pz" width="72" height="72" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#e8d5a3" stroke-width="1.3" opacity="0.3">
+        <path d="M36 8 64 36 36 64 8 36Z"/>
+        <circle cx="36" cy="36" r="6"/>
+        <path d="M36 18v-6M36 60v-6M18 36h-6M60 36h-6"/>
+      </g>
+    </pattern>
+      <clipPath id="pc"><path d="M400 206 C378 206 356 212 340 220 L296 236 L232 372 L286 410 L326 330 L312 886 L488 886 L474 330 L514 410 L568 372 L504 236 L460 220 C444 212 422 206 400 206 Z" transform="translate(50 0)"/></clipPath>
+    </defs>
+    <rect width="900" height="900" fill="url(#pbg)"/>
+    <rect width="900" height="900" fill="url(#pz)" opacity="0.8"/>
+    <circle cx="450" cy="400" r="400" fill="url(#pglow)"/>
+    <g transform="translate(50 -20) scale(1.02)">
+      <path d="M400 206 C378 206 356 212 340 220 L296 236 L232 372 L286 410 L326 330 L312 886 L488 886 L474 330 L514 410 L568 372 L504 236 L460 220 C444 212 422 206 400 206 Z" fill="#5a1d26" stroke="#e3c67f" stroke-width="4"/>
+      <g clip-path="url(#pc)"><rect width="800" height="1000" fill="url(#pz)" opacity="0.7"/></g>
+      <circle cx="400" cy="330" r="7" fill="#e3c67f"/><circle cx="400" cy="410" r="7" fill="#e3c67f"/>
+      <circle cx="400" cy="490" r="7" fill="#e3c67f"/><circle cx="400" cy="570" r="7" fill="#e3c67f"/>
+      <circle cx="400" cy="650" r="7" fill="#e3c67f"/>
+    </g>
+    <rect x="24" y="24" width="852" height="852" fill="none" stroke="#c9a84c" stroke-opacity="0.4" stroke-width="2"/>
+    <text x="450" y="858" text-anchor="middle" font-family="Georgia, serif" font-size="20" letter-spacing="12" fill="#e8d5a3" opacity="0.6">RAJA MENSWEAR</text></svg>
