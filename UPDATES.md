@@ -71,3 +71,20 @@ New APIs: `/api/categories` (public + admin), `/api/chatbot/logs`, `/api/admin/b
   admin login/stats/bags/accounts/chat logs/game config/bulk preview/bill create.
 - OTP delivery is still simulated: the Worker returns `devCode` so the code is shown on screen.
   Set a Worker variable `HIDE_OTP=true` (plus real Twilio/MSG91/SMTP keys) once a sender is wired.
+
+## 10. Installable app (PWA) — storefront + shopkeeper console
+- `client/public/manifest.webmanifest`: standalone app named "Laheri Collection", navy theme, app shortcuts
+  (Shop, Bag, Track order, Shopkeeper console), 3 icons. Orientation left unlocked so the admin console works in landscape.
+- Icons generated from code with no image dependencies: `node scripts/make-icons.cjs` writes
+  `icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` (navy field, gold ring + "L" monogram).
+- `client/public/sw.js` service worker: precaches the app shell, network-first navigations with a cached shell offline,
+  cache-first for same-origin assets, and never caches `/api/*` so stock, orders and bills stay live. Registered in
+  `client/src/main.jsx` for production builds only.
+- `client/src/components/InstallApp.jsx`: real `beforeinstallprompt` install button (captured early in `index.html` so it
+  is never missed), iOS Share -> Add to Home Screen instructions, hidden once installed or dismissed.
+  Shown in the navbar (desktop icon + mobile menu row) and in the shopkeeper sidebar.
+- iOS meta tags + `apple-touch-icon` added to `client/index.html`.
+- Verified live: manifest serves as `application/manifest+json`, service worker as `text/javascript` and controls the
+  page, all 4 icons 200, shell cache filled; install button renders and invokes the prompt.
+- Not covered: a native APK (this is an installable web app), and offline verification was done by cache inspection
+  rather than a real network-off test.

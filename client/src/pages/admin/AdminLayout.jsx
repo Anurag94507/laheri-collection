@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/auth.js';
 import { useSettings } from '../../context/SettingsContext.jsx';
+import InstallApp from '../../components/InstallApp.jsx';
 import { toast } from '../../store/toast.js';
 import {
   IconClose,
@@ -95,6 +96,9 @@ export default function AdminLayout() {
             <p className="truncate text-xs font-medium text-surface">{user?.username || 'admin'}</p>
             <p className="text-[10px] uppercase tracking-[0.14em] text-parchment/35">Shopkeeper</p>
           </div>
+        </div>
+        <div className="mb-2">
+          <InstallApp variant="row" />
         </div>
         <Link to="/" className="mb-2 block rounded-lg border border-parchment/15 px-3 py-2 text-center text-[11px] text-parchment/60 transition hover:border-gold hover:text-gold">
           View storefront

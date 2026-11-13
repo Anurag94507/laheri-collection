@@ -5,6 +5,7 @@ import { cartCount, useCart } from '../store/cart.js';
 import { useChat } from '../store/chat.js';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { IconBag, IconChat, IconClose, IconLock, IconMenu, IconUser } from './Icons.jsx';
+import InstallApp from './InstallApp.jsx';
 
 const links = [
   { to: '/', label: 'Home', end: true },
@@ -109,6 +110,7 @@ export default function Navbar() {
             >
               <IconLock size={17} />
             </Link>
+            <InstallApp variant="icon" className="hidden sm:flex" />
             <Link
               to="/cart"
               className="relative flex h-10 items-center gap-2 rounded-full bg-navy px-3.5 text-surface transition hover:bg-navy-800 sm:px-4"
@@ -163,6 +165,7 @@ export default function Navbar() {
                     Ask Laheri
                   </button>
                 </div>
+                <InstallApp variant="menu" />
                 <div className="flex items-center justify-between border-t border-navy/5 py-4 text-xs text-ink/50">
                   <Link to="/account" className="font-medium text-navy">
                     My account · bag & orders

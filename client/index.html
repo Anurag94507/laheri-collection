@@ -9,6 +9,12 @@
       content="Laheri Collection — Sherwanis, kurtas and formal wear in Sultanpur. Walk in to the shop or order online with fast delivery."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Laheri" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,6 +22,13 @@
       rel="stylesheet"
     />
     <title>Laheri Collection — Dressed for every occasion</title>
+    <script>
+      // Capture the install prompt as early as possible so the in-app button never misses it.
+      window.addEventListener('beforeinstallprompt', function (event) {
+        event.preventDefault();
+        window.__laheriInstallPrompt = event;
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
