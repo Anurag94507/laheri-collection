@@ -154,3 +154,17 @@ Production environment:
 - Verified on preview: 5 wrong `stranger` attempts → 401s, 6th → 429; owner login right after → 200; a wrong owner
   password → 401 and the next correct one → 200. Production owner login 200, and the OTP response no longer has
   `provider` (fields: channel, delivered, expiresInSeconds, identifier, message, ok, purpose, senderConfigured, type).
+
+## 15. Admin orders page, Razorpay online payments
+- `client/src/pages/admin/Orders.jsx` was an "Under construction" placeholder — that is why online orders never
+  showed in the console. It now lists orders with status tabs + counts, search (order id / name / mobile), a details
+  modal (items, totals, delivery, timeline), inline status updates and a WhatsApp link to the customer.
+- Razorpay: `worker/payments.js` creates a payment order (`POST /api/payments/razorpay/order`) and verifies the
+  checkout signature plus the captured amount (`HMAC-SHA256(order|payment)` against `RAZORPAY_KEY_SECRET`).
+  `POST /api/orders` accepts `paymentMethod: "razorpay"` only with a valid signature covering the full total.
+- `GET /api/payments/config` tells the storefront whether online payments are available; without keys checkout keeps
+  cash on delivery and the old demo options, so nothing breaks before keys exist.
+- Secrets to add in Sites → Secrets: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` (test keys first).
+- Verified on production: payment config reports disabled, Razorpay order creation and placement both refuse with a
+  clear message, admin order list returns 3 orders with counts, COD order still places (`ORD-2026-1630`),
+  status update writes a timeline entry. Preview redeployed.

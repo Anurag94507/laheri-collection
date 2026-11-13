@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useCustomer } from '../store/customer.js';
 import { Link, useNavigate } from 'react-router-dom';
-import { lookupCustomer, placeOrder } from '../api/index.js';
+import { createRazorpayOrder, getPaymentConfig, lookupCustomer, placeOrder } from '../api/index.js';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { useCart } from '../store/cart.js';
 import { toast } from '../store/toast.js';
@@ -10,12 +10,36 @@ import { IconArrowLeft, IconArrowRight, IconCheck, IconClock, IconMap, IconTruck
 
 const STEPS = ['Contact', 'Delivery', 'Payment'];
 
-const PAYMENT_OPTIONS = [
+const DEMO_PAYMENT_OPTIONS = [
   { value: 'upi', title: 'UPI / PhonePe', note: 'Pay by any UPI app · demo mode' },
   { value: 'card', title: 'Credit / Debit card', note: 'Visa, Mastercard, RuPay · demo mode' },
   { value: 'netbanking', title: 'Net banking', note: 'All major Indian banks · demo mode' },
-  { value: 'cod', title: 'Cash on delivery', note: 'Pay the delivery partner · ₹0 extra' },
 ];
+
+const COD_OPTION = { value: 'cod', title: 'Cash on delivery', note: 'Pay the delivery partner · ₹0 extra' };
+const RAZORPAY_OPTION = {
+  value: 'razorpay',
+  title: 'Pay online',
+  note: 'UPI, cards & netbanking · secured by Razorpay',
+};
+
+let razorpayScript = null;
+function loadRazorpayScript() {
+  if (window.Razorpay) return Promise.resolve();
+  if (!razorpayScript) {
+    razorpayScript = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve();
+      script.onerror = () => {
+        razorpayScript = null;
+        reject(new Error('Could not load the payment window. Check your connection.'));
+      };
+      document.body.appendChild(script);
+    });
+  }
+  return razorpayScript;
+}
 
 export default function Checkout() {
   const { items, coupon } = useCart();
@@ -25,6 +49,7 @@ export default function Checkout() {
 
   const [step, setStep] = useState(1);
   const [placing, setPlacing] = useState(false);
+  const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [confirmed, setConfirmed] = useState(null);
   const [errors, setErrors] = useState({});
   const [looking, setLooking] = useState(false);
@@ -45,6 +70,16 @@ export default function Checkout() {
   const gstPercent = settings?.shop?.gstPercent ?? 5;
   const shipping = settings?.shipping || {};
   const previewTotals = cartTotals(items, coupon, gstPercent);
+
+  useEffect(() => {
+    getPaymentConfig()
+      .then((data) => {
+        if (!data?.razorpay?.enabled) return;
+        setRazorpayEnabled(true);
+        setForm((current) => (current.paymentMethod === 'upi' ? { ...current, paymentMethod: 'razorpay' } : current));
+      })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     if (settings?.shop?.city && !form.city) setForm((current) => ({ ...current, city: settings.shop.city }));
@@ -119,10 +154,43 @@ export default function Checkout() {
     setStep((current) => Math.min(3, current + 1));
   };
 
+  const payWithRazorpay = async () => {
+    const delivery =
+      form.type === 'home' && previewTotals.subtotal < Number(shipping.freeAbove || 1999)
+        ? Number(shipping.deliveryCharge || 0)
+        : 0;
+    const amount = cartTotals(items, coupon, gstPercent, delivery).grandTotal;
+    const { payment } = await createRazorpayOrder({ amount, receipt: `cart-${Date.now()}` });
+    await loadRazorpayScript();
+
+    return new Promise((resolve, reject) => {
+      const checkout = new window.Razorpay({
+        key: payment.keyId,
+        order_id: payment.orderId,
+        amount: payment.amount,
+        currency: payment.currency,
+        name: settings?.shop?.name || 'Laheri Collection',
+        description: 'Online order payment',
+        prefill: { name: form.name, contact: form.mobile, email: form.email },
+        theme: { color: '#0F1B3C' },
+        handler: (response) =>
+          resolve({
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          }),
+        modal: { ondismiss: () => reject(new Error('Payment cancelled.')) },
+      });
+      checkout.on('payment.failed', () => reject(new Error('The payment did not go through.')));
+      checkout.open();
+    });
+  };
+
   const submit = async () => {
     if (!validateStep()) return;
     setPlacing(true);
     try {
+      const payment = form.paymentMethod === 'razorpay' ? await payWithRazorpay() : null;
       const data = await placeOrder({
         customer: { name: form.name.trim(), mobile: form.mobile.trim(), email: form.email.trim() },
         delivery: {
@@ -135,6 +203,7 @@ export default function Checkout() {
         items: items.map((item) => ({ productId: item.productId, size: item.size, quantity: item.quantity })),
         couponCode: coupon?.code || '',
         paymentMethod: form.paymentMethod,
+        payment,
         notes: form.notes,
       });
       setConfirmed(data.order);
@@ -336,10 +405,14 @@ export default function Checkout() {
               <div className="space-y-5">
                 <div>
                   <h2 className="font-display text-2xl">How would you like to pay?</h2>
-                  <p className="mt-1 text-xs text-ink/45">Online payments are simulated in this demo environment.</p>
+                  <p className="mt-1 text-xs text-ink/45">
+                    {razorpayEnabled
+                      ? 'Pay securely by UPI, card or netbanking, or choose cash on delivery.'
+                      : 'Online payments are simulated until Razorpay keys are added.'}
+                  </p>
                 </div>
                 <div className="space-y-2.5">
-                  {PAYMENT_OPTIONS.map((option) => (
+                  {(razorpayEnabled ? [RAZORPAY_OPTION, COD_OPTION] : [...DEMO_PAYMENT_OPTIONS, COD_OPTION]).map((option) => (
                     <button
                       key={option.value}
                       type="button"

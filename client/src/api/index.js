@@ -17,6 +17,9 @@ export const validateCoupon = (payload) => api.post('/coupons/validate', payload
 export const lookupCustomer = (mobile) =>
   api.get('/customers/lookup', { params: { mobile } }).then((response) => response.data);
 export const placeOrder = (payload) => api.post('/orders', payload).then((response) => response.data);
+export const getPaymentConfig = () => api.get('/payments/config').then((response) => response.data);
+export const createRazorpayOrder = (payload) =>
+  api.post('/payments/razorpay/order', payload).then((response) => response.data);
 export const trackOrder = (orderId) => api.get(`/orders/track/${encodeURIComponent(orderId)}`).then((response) => response.data.order);
 export const sendChatMessage = (payload) => api.post('/chatbot', payload).then((response) => response.data);
 export const spinWheel = (mobile) => api.post('/games/spin', { mobile }).then((response) => response.data);

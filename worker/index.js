@@ -1,5 +1,6 @@
 import { SEED_CATEGORIES, SEED_CUSTOMERS, SEED_PRODUCTS, SEED_SETTINGS } from './seed-data.js';
 import { deliveryStatus, sendCode } from './notify.js';
+import { createPaymentOrder, razorpayConfig, verifyPayment } from './payments.js';
 
 /* ------------------------------------------------------------------ */
 /* helpers                                                             */
@@ -704,6 +705,23 @@ async function handleApi(request, env, url) {
     }
   }
 
+  /* ---- payments ---- */
+  if (root === 'payments') {
+    if (rest[0] === 'config' && method === 'GET') {
+      const razorpay = razorpayConfig(env);
+      return json({ razorpay: { enabled: razorpay.enabled, keyId: razorpay.enabled ? razorpay.keyId : '' } });
+    }
+    if (rest[0] === 'razorpay' && rest[1] === 'order' && method === 'POST') {
+      const input = await body();
+      try {
+        const payment = await createPaymentOrder(env, { amount: input.amount, receipt: input.receipt });
+        return json({ payment }, 201);
+      } catch (error) {
+        return fail(400, error.message || 'Could not start the online payment.');
+      }
+    }
+  }
+
   /* ---- auth (admin) ---- */
   if (root === 'auth') {
     if (rest[0] === 'login' && method === 'POST') {
@@ -1208,7 +1226,34 @@ async function handleApi(request, env, url) {
           ? Number(settings.shipping.deliveryCharge || 0)
           : 0;
       const totals = computeTotals({ items, coupon, gstPercent: settings.shop.gstPercent, deliveryCharge });
-      const paymentMethod = ['upi', 'card', 'netbanking', 'cod'].includes(input.paymentMethod) ? input.paymentMethod : 'cod';
+      const paymentMethod = ['razorpay', 'upi', 'card', 'netbanking', 'cod'].includes(input.paymentMethod)
+        ? input.paymentMethod
+        : 'cod';
+
+      // Online payments are only accepted once Razorpay signs off on them, and only for
+      // the full order value.
+      let paymentRef = null;
+      if (paymentMethod === 'razorpay') {
+        const paymentInput = input.payment || {};
+        try {
+          const verified = await verifyPayment(env, {
+            orderId: paymentInput.razorpayOrderId,
+            paymentId: paymentInput.razorpayPaymentId,
+            signature: paymentInput.razorpaySignature,
+          });
+          if (!verified.ok) return fail(400, 'That payment could not be verified. Nothing was charged twice — please try again.');
+          if (verified.amount + 0.5 < totals.grandTotal)
+            return fail(400, 'The paid amount does not cover this order. Please contact the shop on WhatsApp.');
+          paymentRef = {
+            provider: 'razorpay',
+            orderId: paymentInput.razorpayOrderId,
+            paymentId: paymentInput.razorpayPaymentId,
+          };
+        } catch (error) {
+          return fail(400, error.message || 'Could not verify the online payment.');
+        }
+      }
+      const paymentStatus = paymentMethod === 'cod' ? 'pending' : 'paid';
       const orderId = `ORD-${new Date().getFullYear()}-${Math.floor(1200 + Math.random() * 700)}`;
       const createdAt = nowIso();
 
@@ -1239,7 +1284,8 @@ async function handleApi(request, env, url) {
         ...totals,
         coupon: coupon ? { code: coupon.code, discount: totals.discount } : null,
         paymentMethod,
-        paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+        paymentStatus,
+        paymentRef,
         status: 'placed',
         timeline: [{ status: 'placed', at: createdAt, note: 'Order received on the website' }],
         notes: String(input.notes || ''),

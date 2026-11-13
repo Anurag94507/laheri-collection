@@ -16,6 +16,11 @@
       "name": "notify.js",
       "type": "esm",
       "path": "./worker/notify.js"
+    },
+    {
+      "name": "payments.js",
+      "type": "esm",
+      "path": "./worker/payments.js"
     }
   ],
   "assetsDirectory": "./client/dist",
