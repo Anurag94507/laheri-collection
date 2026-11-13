@@ -110,7 +110,7 @@ export default function Navbar() {
             >
               <IconLock size={17} />
             </Link>
-            <InstallApp variant="icon" className="hidden sm:flex" />
+            <InstallApp className="hidden h-10 w-10 rounded-full border border-navy/10 text-navy/70 hover:border-gold hover:text-navy sm:inline-flex" />
             <Link
               to="/cart"
               className="relative flex h-10 items-center gap-2 rounded-full bg-navy px-3.5 text-surface transition hover:bg-navy-800 sm:px-4"
@@ -165,7 +165,7 @@ export default function Navbar() {
                     Ask Laheri
                   </button>
                 </div>
-                <InstallApp variant="menu" />
+                <InstallApp label className="w-full justify-start border-b border-navy/5 py-3 text-sm font-medium text-gold-dark" />
                 <div className="flex items-center justify-between border-t border-navy/5 py-4 text-xs text-ink/50">
                   <Link to="/account" className="font-medium text-navy">
                     My account · bag & orders

@@ -1,40 +1,27 @@
 import { useEffect, useState } from 'react';
 
-const DISMISS_KEY = 'laheri_install_hint_dismissed';
-
 function isStandalone() {
-  if (typeof window === 'undefined') return false;
   return (
-    window.matchMedia?.('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true
+    window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true
   );
 }
 
 function isIos() {
-  if (typeof navigator === 'undefined') return false;
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
 /**
- * "Install app" control for the PWA.
- * - Android / desktop Chrome / Edge: uses the real beforeinstallprompt flow.
- * - iOS Safari: shows the Share -> Add to Home Screen steps, since iOS has no prompt.
- * - Already installed (standalone) or dismissed: renders nothing.
+ * Install control for the PWA.
+ * Chrome/Edge/Android use the real install prompt; iOS gets Share -> Add to Home Screen steps.
+ * Renders nothing once the app is running installed, or on browsers that offer no way to install.
  */
-export default function InstallApp({ variant = 'icon', className = '' }) {
+export default function InstallApp({ label = false, className = '' }) {
   const [promptEvent, setPromptEvent] = useState(null);
-  const [installed, setInstalled] = useState(isStandalone);
+  const [installed, setInstalled] = useState(() => isStandalone());
   const [showIos, setShowIos] = useState(false);
-  const [dismissed, setDismissed] = useState(() => {
-    try {
-      return localStorage.getItem(DISMISS_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
 
   useEffect(() => {
-    // The prompt may have fired before React mounted (index.html captures it early).
+    // index.html captures the prompt before React mounts, since it can fire early.
     if (window.__laheriInstallPrompt) {
       setPromptEvent(window.__laheriInstallPrompt);
       window.__laheriInstallPrompt = null;
@@ -49,57 +36,38 @@ export default function InstallApp({ variant = 'icon', className = '' }) {
     };
     window.addEventListener('beforeinstallprompt', onPrompt);
     window.addEventListener('appinstalled', onInstalled);
-    const media = window.matchMedia?.('(display-mode: standalone)');
-    const onChange = () => setInstalled(isStandalone());
-    media?.addEventListener?.('change', onChange);
     return () => {
       window.removeEventListener('beforeinstallprompt', onPrompt);
       window.removeEventListener('appinstalled', onInstalled);
-      media?.removeEventListener?.('change', onChange);
     };
   }, []);
 
-  if (installed || dismissed) return null;
-  const canPrompt = Boolean(promptEvent);
-  const iosHint = !canPrompt && isIos();
-  if (!canPrompt && !iosHint) return null;
+  if (installed || (!promptEvent && !isIos())) return null;
 
   const install = async () => {
-    if (canPrompt) {
-      promptEvent.prompt();
-      const choice = await promptEvent.userChoice;
-      if (choice?.outcome === 'accepted') setInstalled(true);
-      setPromptEvent(null);
+    if (!promptEvent) {
+      setShowIos(true);
       return;
     }
-    setShowIos(true);
+    promptEvent.prompt();
+    const choice = await promptEvent.userChoice;
+    if (choice?.outcome === 'accepted') setInstalled(true);
+    setPromptEvent(null);
   };
-
-  const dismiss = () => {
-    try {
-      localStorage.setItem(DISMISS_KEY, '1');
-    } catch {
-      /* ignore */
-    }
-    setDismissed(true);
-  };
-
-  const base =
-    variant === 'row'
-      ? 'flex w-full items-center justify-center gap-2 rounded-lg border border-gold/40 px-3 py-2 text-[11px] font-medium text-gold transition hover:bg-gold/10'
-      : variant === 'menu'
-        ? 'flex w-full items-center gap-2 border-b border-navy/5 py-3 text-sm font-medium text-gold-dark'
-        : 'flex h-10 w-10 items-center justify-center rounded-full border border-navy/10 text-navy/70 transition hover:border-gold hover:text-navy';
 
   return (
     <>
-      <button type="button" onClick={install} className={`${base} ${className}`} aria-label="Install the Laheri app">
-        <svg viewBox="0 0 24 24" width={variant === 'row' ? 14 : 18} height={variant === 'row' ? 14 : 18} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <button
+        type="button"
+        onClick={install}
+        className={`inline-flex items-center justify-center gap-2 transition ${className}`}
+        aria-label="Install the Laheri app"
+      >
+        <svg viewBox="0 0 24 24" width={label ? 14 : 18} height={label ? 14 : 18} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <rect x="6" y="2.5" width="12" height="19" rx="3" />
-          <path d="M12 7v6" />
-          <path d="M9.5 10.5 12 13l2.5-2.5" />
+          <path d="M12 7v6M9.5 10.5 12 13l2.5-2.5" />
         </svg>
-        {variant !== 'icon' && <span>Install app</span>}
+        {label && <span>Install app</span>}
       </button>
 
       {showIos && (
@@ -116,7 +84,7 @@ export default function InstallApp({ variant = 'icon', className = '' }) {
               <li>2. Scroll and tap <strong>Add to Home Screen</strong>.</li>
               <li>3. Tap <strong>Add</strong> — the Laheri app icon appears with your other apps.</li>
             </ol>
-            <button type="button" onClick={dismiss} className="btn-outline btn-sm mt-5 w-full">Got it</button>
+            <button type="button" onClick={() => setShowIos(false)} className="btn-outline btn-sm mt-5 w-full">Got it</button>
           </div>
         </div>
       )}

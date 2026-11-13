@@ -97,9 +97,7 @@ export default function AdminLayout() {
             <p className="text-[10px] uppercase tracking-[0.14em] text-parchment/35">Shopkeeper</p>
           </div>
         </div>
-        <div className="mb-2">
-          <InstallApp variant="row" />
-        </div>
+        <InstallApp label className="mb-2 w-full rounded-lg border border-gold/40 py-2 text-[11px] font-medium text-gold hover:bg-gold/10" />
         <Link to="/" className="mb-2 block rounded-lg border border-parchment/15 px-3 py-2 text-center text-[11px] text-parchment/60 transition hover:border-gold hover:text-gold">
           View storefront
         </Link>

@@ -88,3 +88,26 @@ New APIs: `/api/categories` (public + admin), `/api/chatbot/logs`, `/api/admin/b
   page, all 4 icons 200, shell cache filled; install button renders and invokes the prompt.
 - Not covered: a native APK (this is an installable web app), and offline verification was done by cache inspection
   rather than a real network-off test.
+
+## 11. PWA review, cache fixes, and production launch
+Simplified after a second pass:
+- One install control instead of three variants: `<InstallApp label />`, styling passed via `className`.
+- Dropped the dismissed-hint localStorage flag, the unused SW `message` listener, the duplicate `/` precache entry,
+  and unused manifest fields (`display_override`, `dir`, `lang`, `categories`, per-shortcut icons, `prefer_related_applications`).
+- Removed the needless `nodejs_compat` flag from the deploy manifest (the Worker uses only Web Crypto/text encoders).
+
+Stale-cache fixes:
+- Precache now uses `cache: 'reload'` so a fresh install never picks up HTML from the HTTP cache.
+- `/assets/*` is treated as immutable (hashed by the build); everything else is stale-while-revalidate, so a replaced
+  logo or product photo shows on the next view instead of staying stale under the same URL.
+- `/api` (exact) as well as `/api/*` bypasses the worker; sign-in, stock, orders and bills are never served from cache.
+- The worker is registered with `updateViaCache: 'none'` and explicitly checked for updates; a new deploy reloads the
+  page once on `controllerchange` (guarded so the first install does not reload), so old and new bundles never mix.
+- Precaching each shell file independently means one failed fetch cannot leave the shell empty.
+
+Production environment:
+- Own D1 database bound as `DB` (separate from preview), fresh seed on first request.
+- Live: https://site-ac9250f405614c4fb38fb9ad6a70c64a.freebuff.page (published).
+- Verified there: health, 22 seeded products, OTP sign-in + session, order `ORD-2026-1269` (₹10,498.95),
+  admin login with stats reflecting the order, manifest/service-worker/icons served with correct types,
+  service worker active and controlling the page, shell + static caches populated, install button wired.
