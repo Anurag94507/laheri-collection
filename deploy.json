@@ -1,13 +1,11 @@
 {
   "entrypoint": "index.js",
-  "compatibilityDate": "2026-11-12",
+  "compatibilityDate": "2026-11-13",
+  "compatibilityFlags": ["nodejs_compat"],
   "modules": [
-    {
-      "name": "index.js",
-      "type": "esm",
-      "path": "server/src/index.js"
-    }
+    { "name": "index.js", "type": "esm", "path": "./worker/index.js" },
+    { "name": "seed-data.js", "type": "esm", "path": "./worker/seed-data.js" }
   ],
-  "assetsDirectory": "client/dist",
+  "assetsDirectory": "./client/dist",
   "spa": true
 }

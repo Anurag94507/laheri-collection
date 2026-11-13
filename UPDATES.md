@@ -59,3 +59,15 @@ New APIs: `/api/categories` (public + admin), `/api/chatbot/logs`, `/api/admin/b
 ## Notes / limits
 - WhatsApp/SMS/email are simulated until Twilio / MSG91 / SMTP credentials are set in `server/.env`.
 - Login codes are shown on screen only while `NODE_ENV !== "production"`.
+
+## 9. Deployment (Freebuff Sites / Cloudflare Workers)
+- Express backend ported to a single Cloudflare Worker: `worker/index.js` (+ `worker/seed-data.js`).
+- Storage: D1 database bound as `DB`, one generic `docs(collection, id, json)` table; data auto-seeds on first request.
+- Static build served by `env.ASSETS` with SPA fallback; `deploy.json` is the Worker deploy manifest (`client/dist` assets).
+- Live: https://site-e164a0910a5e41729cd089cf6b464256.freebuff.page
+- Source: https://github.com/Anurag94507/laheri-collection
+- Verified live: home page + assets, `/api/health`, settings, products (22), categories (6),
+  OTP request/verify + session, bag save, order placement (`ORD-2026-1604`), spin coupon, chatbot,
+  admin login/stats/bags/accounts/chat logs/game config/bulk preview/bill create.
+- OTP delivery is still simulated: the Worker returns `devCode` so the code is shown on screen.
+  Set a Worker variable `HIDE_OTP=true` (plus real Twilio/MSG91/SMTP keys) once a sender is wired.
