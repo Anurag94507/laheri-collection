@@ -111,3 +111,17 @@ Production environment:
 - Verified there: health, 22 seeded products, OTP sign-in + session, order `ORD-2026-1269` (₹10,498.95),
   admin login with stats reflecting the order, manifest/service-worker/icons served with correct types,
   service worker active and controlling the page, shell + static caches populated, install button wired.
+
+## 12. OTP no longer public, admin password replaced
+- `POST /api/account/request-otp` never returns the code from a deployed build. Only a local Worker with
+  `OTP_DEBUG=true` echoes it back. The response no longer even has a `devCode` key.
+- Codes are delivered out of band: staff open **Dashboard → Login codes** (`GET /api/admin/otp-codes`, admin only)
+  and send the code to the customer on WhatsApp. Only unused, unexpired codes are listed, newest first.
+- The admin login no longer has a built-in `admin` / `shop12345` fallback. It now fails closed (503) unless
+  `ADMIN_PASSWORD` (12+ characters) is configured; username stays configurable via `ADMIN_USERNAME` (default `admin`).
+- Demo-credential card removed from the admin login page; the deployed bundle contains no hardcoded password.
+- `ADMIN_PASSWORD` set as a Worker secret on production and preview; the generated value is kept locally in
+  `.secrets/admin-password.txt` (gitignored) and can be rotated in Sites → Secrets.
+- Verified on production: old password 401, wrong username 401, new password 200; OTP response has no code;
+  `/api/admin/otp-codes` 401 without a session and returns the pending code to the admin; that code signs the
+  customer in; order placed. Preview re-checked with the same results.

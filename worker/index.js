@@ -703,8 +703,12 @@ async function handleApi(request, env, url) {
   if (root === 'auth') {
     if (rest[0] === 'login' && method === 'POST') {
       const input = await body();
-      const username = env.ADMIN_USERNAME || 'admin';
-      const password = env.ADMIN_PASSWORD || 'shop12345';
+      const username = String(env.ADMIN_USERNAME || 'admin').trim();
+      const password = String(env.ADMIN_PASSWORD || '');
+      // No built-in default: an unconfigured deployment refuses admin logins instead of
+      // falling back to a password everybody knows.
+      if (password.length < 12)
+        return fail(503, 'Admin login is not configured for this shop yet.');
       if (String(input.username || '').trim() !== username || String(input.password || '') !== password)
         return fail(401, 'Invalid username or password.');
       const token = await signToken(
@@ -781,9 +785,10 @@ async function handleApi(request, env, url) {
         purpose,
         delivered: true,
         expiresInSeconds: 300,
-        // No SMS/SMTP provider is connected to the hosted build, so the code is
-        // shown here to keep login usable. Connect Twilio/SMTP to hide it.
-        devCode: env.HIDE_OTP === 'true' ? undefined : code,
+        // Codes are never returned by a deployed build. Only a local dev Worker with
+        // OTP_DEBUG=true echoes the code back; the shop relays real codes from the
+        // admin console (GET /api/admin/otp-codes).
+        devCode: env.OTP_DEBUG === 'true' ? code : undefined,
         message: `A 6-digit code was sent to ${identifier}.`,
       });
     }
@@ -1558,6 +1563,27 @@ async function handleApi(request, env, url) {
   /* ---- admin ---- */
   if (root === 'admin') {
     if (!(await authUser(request, env))) return fail(401, 'Login required.');
+    if (rest[0] === 'otp-codes' && method === 'GET') {
+      // Sign-in codes are delivered out of band: staff read them here and send them to
+      // the customer on WhatsApp. Only unexpired, unused codes are listed.
+      const codes = await listDocs(env, 'otps');
+      const now = Date.now();
+      const pending = codes
+        .filter((entry) => !entry.usedAt && new Date(entry.expiresAt).getTime() > now)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 20)
+        .map(({ _id, identifier, type, channel, purpose, code, createdAt, expiresAt }) => ({
+          _id,
+          identifier,
+          type,
+          channel,
+          purpose,
+          code,
+          createdAt,
+          expiresAt,
+        }));
+      return json({ codes: pending, total: pending.length });
+    }
     if (rest[0] === 'stats' && method === 'GET') {
       const [bills, orders, customers, products, campaigns, chatLogs] = await Promise.all([
         listDocs(env, 'bills'),

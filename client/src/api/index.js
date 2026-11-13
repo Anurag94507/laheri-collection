@@ -30,6 +30,7 @@ export const adminLogout = () => api.post('/auth/logout').then((response) => res
 export const adminMe = () => api.get('/auth/me').then((response) => response.data.user);
 
 export const getDashboard = () => api.get('/admin/stats').then((response) => response.data);
+export const getLoginCodes = () => api.get('/admin/otp-codes').then((response) => response.data);
 
 export const createProduct = (payload) => api.post('/products', payload).then((response) => response.data);
 export const updateProduct = (id, payload) => api.put(`/products/${id}`, payload).then((response) => response.data);

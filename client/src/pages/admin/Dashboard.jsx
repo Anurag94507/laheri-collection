@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getDashboard } from '../../api/index.js';
+import { getDashboard, getLoginCodes } from '../../api/index.js';
 import { AcquisitionLine, CategoryDonut, RevenueBars } from '../../components/Charts.jsx';
 import { formatDateTime, formatINR } from '../../utils/format.js';
 import {
@@ -18,6 +18,61 @@ const STAT_TEMPLATES = [
   { key: 'totalCustomers', label: 'CRM contacts', sub: 'newCustomersWeek', subLabel: 'new this week', icon: IconUsers, accent: 'bg-success/10 text-success' },
   { key: 'messagesThisMonth', label: 'Messages sent', sub: 'chatbotToday', subLabel: 'chats today', icon: IconChat, accent: 'bg-gold/15 text-gold-dark' },
 ];
+
+function LoginCodes() {
+  const [codes, setCodes] = useState([]);
+  const [state, setState] = useState('loading');
+
+  const load = () => {
+    setState('loading');
+    getLoginCodes()
+      .then((data) => {
+        setCodes(data.codes || []);
+        setState('ready');
+      })
+      .catch(() => setState('error'));
+  };
+
+  useEffect(load, []);
+
+  return (
+    <div className="admin-card">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-xl">Login codes</h2>
+          <p className="text-[11px] text-ink/40">Customers no longer see their OTP — send them the code on WhatsApp.</p>
+        </div>
+        <button type="button" onClick={load} disabled={state === 'loading'} className="btn-outline btn-sm">
+          {state === 'loading' ? 'Refreshing…' : 'Refresh'}
+        </button>
+      </div>
+
+      {state === 'error' ? (
+        <p className="mt-4 text-xs text-error">Could not load pending codes.</p>
+      ) : codes.length === 0 ? (
+        <p className="mt-4 text-xs text-ink/40">
+          {state === 'loading'
+            ? 'Loading…'
+            : 'No codes waiting. A code appears here for 5 minutes after a customer asks for one.'}
+        </p>
+      ) : (
+        <ul className="mt-4 divide-y divide-navy/5">
+          {codes.map((entry) => (
+            <li key={entry._id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-navy/80">{entry.identifier}</p>
+                <p className="text-[10px] uppercase tracking-[0.12em] text-ink/35">
+                  {entry.purpose === 'reset' ? 'Password reset' : 'Sign in'} · {entry.channel} · {formatDateTime(entry.createdAt)}
+                </p>
+              </div>
+              <span className="font-mono text-base font-bold tracking-[0.2em] text-gold-dark">{entry.code}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -70,6 +125,8 @@ export default function Dashboard() {
           );
         })}
       </div>
+
+      <LoginCodes />
 
       <div className="grid gap-5 xl:grid-cols-3">
         <div className="admin-card xl:col-span-2">

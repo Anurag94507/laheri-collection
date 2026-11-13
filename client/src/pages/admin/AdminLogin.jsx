@@ -121,11 +121,9 @@ export default function AdminLogin() {
             </button>
           </form>
 
-          <div className="mt-7 rounded-xl border border-navy/10 bg-white p-4 text-[11px] leading-relaxed text-ink/50">
-            <p className="font-semibold uppercase tracking-[0.14em] text-navy/60">Demo login</p>
-            <p className="mt-1.5">Username <span className="font-mono text-navy">admin</span> · Password <span className="font-mono text-navy">shop12345</span></p>
-            <p className="mt-1">Change these in <span className="font-mono">server/.env</span> before going live.</p>
-          </div>
+          <p className="mt-7 text-center text-[11px] leading-relaxed text-ink/40">
+            The shopkeeper password is set by the owner in the hosting secrets, never in the app.
+          </p>
 
           <Link to="/" className="mt-8 hidden text-xs text-ink/40 transition hover:text-navy lg:block">← Back to the shop</Link>
         </div>
