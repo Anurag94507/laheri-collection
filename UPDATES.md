@@ -144,3 +144,13 @@ Production environment:
   production admin login stayed 200 — the counters live in each environment's own database.
 - Not yet exercised live: delivery to a real phone/email, and the panel hiding, both need provider keys in
   Sites → Secrets. Preview admin login from this machine stays locked until the 10 minute window expires.
+
+## 14. Admin lockout keyed per IP + username
+- The throttle bucket is now `admin:<ip>:owner` for the configured username and `admin:<ip>:other` for anything else,
+  so wrong usernames typed on the shop wifi lock only that bucket and the owner can still sign in.
+- Unknown usernames share one bucket per IP, so guessing names cannot create unbounded rows in D1.
+- Removed while reviewing the delivery/throttle change: the `provider` field from the public OTP response (unused by the
+  app), the unused `updatedAt` on throttle rows, and a duplicated MSG91 key check now read from `deliveryStatus`.
+- Verified on preview: 5 wrong `stranger` attempts → 401s, 6th → 429; owner login right after → 200; a wrong owner
+  password → 401 and the next correct one → 200. Production owner login 200, and the OTP response no longer has
+  `provider` (fields: channel, delivered, expiresInSeconds, identifier, message, ok, purpose, senderConfigured, type).

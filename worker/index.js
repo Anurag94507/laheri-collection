@@ -715,8 +715,13 @@ async function handleApi(request, env, url) {
       if (password.length < 12)
         return fail(503, 'Admin login is not configured for this shop yet.');
 
-      // Throttle wrong passwords per client IP so nobody can grind the console.
-      const attemptId = `admin:${request.headers.get('CF-Connecting-IP') || 'unknown'}`;
+      // Throttle wrong passwords per IP *and* username, so a wrong username typed on the
+      // shop wifi cannot lock the owner out. Unknown usernames share one bucket per IP
+      // instead of creating a row each.
+      const attempted = String(input.username || '').trim();
+      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+      const bucket = attempted.toLowerCase() === username.toLowerCase() ? 'owner' : 'other';
+      const attemptId = `admin:${ip}:${bucket}`;
       const attempt = await getDoc(env, 'loginAttempts', attemptId);
       const lockedUntil = attempt?.lockedUntil ? new Date(attempt.lockedUntil).getTime() : 0;
       if (lockedUntil > Date.now()) {
@@ -728,8 +733,7 @@ async function handleApi(request, env, url) {
         );
       }
 
-      const matches =
-        String(input.username || '').trim() === username && String(input.password || '') === password;
+      const matches = attempted === username && String(input.password || '') === password;
       if (!matches) {
         const windowOpen = attempt?.firstAt && Date.now() - new Date(attempt.firstAt).getTime() < ADMIN_LOCK_MS;
         const count = (windowOpen ? attempt.count : 0) + 1;
@@ -738,7 +742,6 @@ async function handleApi(request, env, url) {
           count,
           firstAt: windowOpen ? attempt.firstAt : nowIso(),
           lockedUntil: count >= ADMIN_MAX_FAILS ? new Date(Date.now() + ADMIN_LOCK_MS).toISOString() : null,
-          updatedAt: nowIso(),
         });
         return fail(401, 'Invalid username or password.');
       }
@@ -813,12 +816,10 @@ async function handleApi(request, env, url) {
       // Send it for real when a provider is configured; otherwise the shop relays it.
       const delivery = deliveryStatus(env);
       let sent = false;
-      let provider = null;
       if (delivery.configured) {
         try {
-          const result = await sendCode(env, { channel, identifier, code });
+          await sendCode(env, { channel, identifier, code });
           sent = true;
-          provider = result.provider;
         } catch (error) {
           console.error('otp_delivery_failed', error?.message || error);
           return json(
@@ -840,7 +841,6 @@ async function handleApi(request, env, url) {
         purpose,
         delivered: sent,
         senderConfigured: delivery.configured,
-        provider,
         expiresInSeconds: 300,
         // Codes are never returned by a deployed build. Only a local dev Worker with
         // OTP_DEBUG=true echoes the code back.

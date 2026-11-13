@@ -24,6 +24,7 @@ export function deliveryStatus(env) {
   const email = Boolean(value(env, 'RESEND_API_KEY') && value(env, 'MAIL_FROM'));
   return {
     configured: msg91 || twilioSms || twilioWhatsapp || email,
+    msg91,
     sms: msg91 || twilioSms,
     whatsapp: twilioWhatsapp,
     email,
@@ -119,7 +120,7 @@ export async function sendCode(env, { channel, identifier, code }) {
   if (channel === 'whatsapp' && status.whatsapp) {
     return { provider: await sendTwilio(env, identifier, value(env, 'TWILIO_WHATSAPP_FROM'), code, true), channel: 'whatsapp' };
   }
-  if (value(env, 'MSG91_AUTH_KEY') && value(env, 'MSG91_TEMPLATE_ID')) {
+  if (status.msg91) {
     return { provider: await sendMsg91(env, identifier, code), channel: 'sms' };
   }
   if (status.sms) {
