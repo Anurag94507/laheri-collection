@@ -98,7 +98,53 @@ async function issueCoupon(db, { mobile, source, discountType, discountValue, ap
 router.get(
   '/segments',
   asyncHandler(async (_req, res) => {
-    res.json({ segments: SPIN_SEGMENTS.map(({ label, type, value }) => ({ label, type, value })) });
+    const db = await getDb();
+    const settings = await getSettings(db);
+    res.json({
+      segments: SPIN_SEGMENTS.map(({ label, type, value }) => ({ label, type, value })),
+      games: settings.games,
+    });
+  })
+);
+
+router.get(
+  '/config',
+  requireAdmin,
+  asyncHandler(async (_req, res) => {
+    const db = await getDb();
+    const settings = await getSettings(db);
+    res.json({ games: settings.games, segments: SPIN_SEGMENTS.map(({ label, type, value }) => ({ label, type, value })) });
+  })
+);
+
+router.put(
+  '/config',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const db = await getDb();
+    const settings = await getSettings(db);
+    const body = req.body || {};
+    const clampPercent = (value, fallback) => {
+      const number = asNumber(value, fallback);
+      return Math.max(0, Math.min(100, number));
+    };
+    const games = {
+      ...settings.games,
+      spinEnabled: body.spinEnabled !== undefined ? Boolean(body.spinEnabled) : settings.games.spinEnabled,
+      puzzleEnabled: body.puzzleEnabled !== undefined ? Boolean(body.puzzleEnabled) : settings.games.puzzleEnabled,
+      quizEnabled: body.quizEnabled !== undefined ? Boolean(body.quizEnabled) : settings.games.quizEnabled,
+      puzzleDiscount: clampPercent(body.puzzleDiscount, settings.games.puzzleDiscount),
+      quizDiscount: clampPercent(body.quizDiscount, settings.games.quizDiscount),
+      spinValidityHours: Math.max(1, asNumber(body.spinValidityHours, settings.games.spinValidityHours)),
+      puzzleValidityHours: Math.max(1, asNumber(body.puzzleValidityHours, settings.games.puzzleValidityHours)),
+      quizValidityHours: Math.max(1, asNumber(body.quizValidityHours, settings.games.quizValidityHours)),
+      spinCooldownDays: Math.max(1, asNumber(body.spinCooldownDays, settings.games.spinCooldownDays)),
+    };
+    await db.collection('settings').updateOne(
+      { _id: 'settings' },
+      { $set: { games, updatedAt: new Date().toISOString() } }
+    );
+    res.json({ games, message: 'Game offers updated.' });
   })
 );
 
@@ -106,10 +152,15 @@ router.post(
   '/spin',
   asyncHandler(async (req, res) => {
     const db = await getDb();
+    const settings = await getSettings(db);
+    if (settings.games?.spinEnabled === false) {
+      return res.status(403).json({ error: 'The spin wheel is paused by the shop right now.' });
+    }
     const mobile = await requireMobile(req);
-    const nextAvailable = await recentPlay(db, mobile, 'spin', 7 * DAY);
+    const cooldownDays = Math.max(1, Number(settings.games?.spinCooldownDays) || 7);
+    const nextAvailable = await recentPlay(db, mobile, 'spin', cooldownDays * DAY);
     if (nextAvailable) {
-      return res.status(429).json({ error: 'You have already spun this week.', nextAvailableAt: nextAvailable });
+      return res.status(429).json({ error: `You have already spun in the last ${cooldownDays} days.`, nextAvailableAt: nextAvailable });
     }
 
     const totalWeight = SPIN_SEGMENTS.reduce((sum, segment) => sum + segment.weight, 0);
@@ -135,7 +186,7 @@ router.post(
       discountType: prize.type === 'percent' ? 'percent' : 'offer',
       discountValue: prize.value,
       applicableOn: prize.applicableOn,
-      validityHours: 48,
+      validityHours: Math.max(1, Number(settings.games?.spinValidityHours) || 48),
       label: prize.label,
     });
     await recordPlay(db, mobile, 'spin', true, { prize: prize.label, couponCode: coupon.code });
@@ -145,7 +196,7 @@ router.post(
       index,
       prize: prize.label,
       coupon,
-      message: `You won ${prize.label}! Coupon ${coupon.code} is valid for 48 hours.`,
+      message: `You won ${prize.label}! Coupon ${coupon.code} is valid for ${Math.max(1, Number(settings.games?.spinValidityHours) || 48)} hours.`,
     });
   })
 );
@@ -154,6 +205,10 @@ router.post(
   '/puzzle',
   asyncHandler(async (req, res) => {
     const db = await getDb();
+    const settings = await getSettings(db);
+    if (settings.games?.puzzleEnabled === false) {
+      return res.status(403).json({ error: 'The puzzle game is paused by the shop right now.' });
+    }
     const mobile = await requireMobile(req);
     const timeTaken = asNumber(req.body?.timeTaken, 0);
     if (timeTaken <= 0 || timeTaken > 120) {
@@ -164,16 +219,22 @@ router.post(
       return res.status(429).json({ error: 'You already won a puzzle coupon today.', nextAvailableAt: nextAvailable });
     }
 
+    const discount = Math.max(1, Number(settings.games?.puzzleDiscount) || 12);
+    const validityHours = Math.max(1, Number(settings.games?.puzzleValidityHours) || 24);
     const coupon = await issueCoupon(db, {
       mobile,
       source: 'puzzle',
       discountType: 'percent',
-      discountValue: 12,
-      validityHours: 24,
-      label: '12% OFF — Puzzle solved',
+      discountValue: discount,
+      validityHours,
+      label: `${discount}% OFF — Puzzle solved`,
     });
     await recordPlay(db, mobile, 'puzzle', true, { couponCode: coupon.code, timeTaken });
-    res.json({ won: true, coupon, message: `Puzzle solved in ${timeTaken}s. 12% OFF coupon ${coupon.code} is yours for 24 hours.` });
+    res.json({
+      won: true,
+      coupon,
+      message: `Puzzle solved in ${timeTaken}s. ${discount}% OFF coupon ${coupon.code} is yours for ${validityHours} hours.`,
+    });
   })
 );
 
@@ -185,6 +246,10 @@ router.post(
   '/quiz',
   asyncHandler(async (req, res) => {
     const db = await getDb();
+    const settings = await getSettings(db);
+    if (settings.games?.quizEnabled === false) {
+      return res.status(403).json({ error: 'The quiz is paused by the shop right now.' });
+    }
     const mobile = await requireMobile(req);
     const answers = Array.isArray(req.body?.answers) ? req.body.answers.map((value) => asNumber(value, -1)) : [];
     const correct = QUIZ.reduce((sum, question, index) => sum + (answers[index] === question.answer ? 1 : 0), 0);
@@ -195,16 +260,24 @@ router.post(
     if (nextAvailable) {
       return res.status(429).json({ error: 'You already earned today’s quiz coupon.', nextAvailableAt: nextAvailable });
     }
+    const discount = Math.max(1, Number(settings.games?.quizDiscount) || 10);
+    const validityHours = Math.max(1, Number(settings.games?.quizValidityHours) || 24);
     const coupon = await issueCoupon(db, {
       mobile,
       source: 'quiz',
       discountType: 'percent',
-      discountValue: 10,
-      validityHours: 24,
-      label: '10% OFF — Quiz champion',
+      discountValue: discount,
+      validityHours,
+      label: `${discount}% OFF — Quiz champion`,
     });
     await recordPlay(db, mobile, 'quiz', true, { couponCode: coupon.code });
-    res.json({ won: true, coupon, correct, total: QUIZ.length, message: `All correct! 10% OFF coupon ${coupon.code} is valid for 24 hours.` });
+    res.json({
+      won: true,
+      coupon,
+      correct,
+      total: QUIZ.length,
+      message: `All correct! ${discount}% OFF coupon ${coupon.code} is valid for ${validityHours} hours.`,
+    });
   })
 );
 

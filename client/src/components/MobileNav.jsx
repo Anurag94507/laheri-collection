@@ -45,7 +45,7 @@ export default function MobileNav() {
         ))}
         <button type="button" onClick={openChat} className="flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium tracking-wide text-ink/45">
           <IconChat size={20} />
-          <span>Raja</span>
+          <span>Laheri</span>
         </button>
       </div>
     </nav>

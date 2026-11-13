@@ -50,7 +50,7 @@ export default function ProductCard({ product, showCompare = false, onCompare, c
             </button>
           )}
           <a
-            href={`https://wa.me/?text=${encodeURIComponent(`Check this out from Raja Menswear: ${product.name} — ${typeof window !== 'undefined' ? window.location.origin : ''}/collections/${product._id}`)}`}
+            href={`https://wa.me/?text=${encodeURIComponent(`Check this out from Laheri Collection: ${product.name} — ${typeof window !== 'undefined' ? window.location.origin : ''}/collections/${product._id}`)}`}
             target="_blank"
             rel="noreferrer"
             onClick={(event) => event.stopPropagation()}

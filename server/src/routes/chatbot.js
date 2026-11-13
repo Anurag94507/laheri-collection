@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getDb } from '../db/index.js';
+import { requireAdmin } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/error.js';
 import { upsertCustomer } from '../services/crm.js';
 import { generateReply } from '../services/chatbot.js';
@@ -49,6 +50,33 @@ router.post(
     }
 
     res.json({ reply, source, suggestions: suggestions || [] });
+  })
+);
+
+router.get(
+  '/logs',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const db = await getDb();
+    const logs = await db.collection('chatLogs').find({}).sort({ createdAt: -1 }).toArray();
+    const { q, page = 1, limit = 40 } = req.query;
+    let filtered = logs;
+    if (q) {
+      const needle = String(q).toLowerCase();
+      filtered = filtered.filter((log) =>
+        [log.preview, log.replyPreview, log.sessionId].join(' ').toLowerCase().includes(needle)
+      );
+    }
+    const pageNumber = Math.max(1, Number(page) || 1);
+    const pageSize = Math.min(100, Math.max(1, Number(limit) || 40));
+    const start = (pageNumber - 1) * pageSize;
+    res.json({
+      logs: filtered.slice(start, start + pageSize),
+      total: filtered.length,
+      sessions: new Set(filtered.map((log) => log.sessionId)).size,
+      page: pageNumber,
+      pages: Math.max(1, Math.ceil(filtered.length / pageSize)),
+    });
   })
 );
 

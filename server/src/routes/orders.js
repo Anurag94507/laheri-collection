@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getDb } from '../db/index.js';
-import { requireAdmin } from '../middleware/auth.js';
+import { optionalCustomer, requireAdmin } from '../middleware/auth.js';
 import { asyncHandler, httpError } from '../middleware/error.js';
 import { upsertCustomer } from '../services/crm.js';
 import { notifyCustomer, waLink } from '../services/notify.js';
@@ -23,6 +23,7 @@ const STATUSES = ['placed', 'confirmed', 'packed', 'shipped', 'delivered', 'canc
 
 router.post(
   '/',
+  optionalCustomer,
   asyncHandler(async (req, res) => {
     const db = await getDb();
     const settings = await getSettings(db);
@@ -132,6 +133,7 @@ router.post(
       timeline: [{ status: 'placed', at: now, note: 'Order received on the website' }],
       notes: asString(body.notes),
       source: 'online',
+      accountId: req.customerId || null,
       whatsappLink: waLink(
         mobile,
         `Dear ${name}, your order #${orderId} has been confirmed at ${settings.shop.name}. We'll dispatch it soon! — ${settings.shop.phone}`

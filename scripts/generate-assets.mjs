@@ -298,7 +298,7 @@ for (const [index, post] of socialTones.entries()) {
         <g clip-path="url(#sc-${index})"><rect width="800" height="1000" fill="url(#sp-${index})" opacity="0.55"/></g>
       </g>
       <rect x="26" y="26" width="748" height="748" fill="none" stroke="${post.accent}" stroke-opacity="0.3"/>
-      <text x="400" y="742" text-anchor="middle" font-family="Georgia, serif" font-size="20" letter-spacing="10" fill="${post.accent}" opacity="0.65">RAJA MENSWEAR</text>`
+      <text x="400" y="742" text-anchor="middle" font-family="Georgia, serif" font-size="20" letter-spacing="10" fill="${post.accent}" opacity="0.65">LAHERI COLLECTION</text>`
     )
   );
 }
@@ -410,7 +410,7 @@ fs.writeFileSync(
       <circle cx="400" cy="650" r="7" fill="#e3c67f"/>
     </g>
     <rect x="24" y="24" width="852" height="852" fill="none" stroke="#c9a84c" stroke-opacity="0.4" stroke-width="2"/>
-    <text x="450" y="858" text-anchor="middle" font-family="Georgia, serif" font-size="20" letter-spacing="12" fill="#e8d5a3" opacity="0.6">RAJA MENSWEAR</text>`
+    <text x="450" y="858" text-anchor="middle" font-family="Georgia, serif" font-size="20" letter-spacing="12" fill="#e8d5a3" opacity="0.6">LAHERI COLLECTION</text>`
   )
 );
 

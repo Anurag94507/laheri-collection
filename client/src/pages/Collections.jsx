@@ -184,7 +184,7 @@ export default function Collections() {
       <PageHero
         eyebrow="The collection"
         title={category === 'All' ? 'Every piece, one place' : category}
-        description="Hand-picked menswear stocked at our Lucknow shop. Filter by fabric, size and budget — then try it on in store or order online."
+        description="Hand-picked menswear stocked at our Sultanpur shop. Search or filter by category, fabric, size and budget — then try it on in store or order online."
         compact
       >
         <form
@@ -204,6 +204,26 @@ export default function Collections() {
           />
           <button type="submit" className="btn-gold btn-sm">Search</button>
         </form>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {['All', ...data.facets.categories].map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => {
+                update('category', option);
+                setSearchText('');
+              }}
+              className={`rounded-full border px-3.5 py-1.5 text-[11px] font-medium transition ${
+                (option === 'All' ? category === 'All' : category === option)
+                  ? 'border-gold bg-gold text-navy'
+                  : 'border-parchment/25 text-parchment/70 hover:border-gold hover:text-gold'
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
       </PageHero>
 
       <div className="container-x grid gap-10 py-12 lg:grid-cols-[240px_1fr]">

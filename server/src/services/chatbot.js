@@ -5,7 +5,7 @@ export function buildSystemPrompt(settings) {
   const shop = settings.shop;
   const offers = settings.offers;
   const hours = (shop.hours || []).map((slot) => `${slot.days}: ${slot.time}`).join('; ');
-  return `You are "Raja", the friendly AI assistant for ${shop.name}, a trusted men's readymade clothing store located at ${shop.address}, ${shop.city}.
+  return `You are "Laheri", the friendly AI assistant for ${shop.name}, a trusted men's readymade clothing store located at ${shop.address}, ${shop.city}.
 
 SHOP DETAILS:
 - Shop Name: ${shop.name}

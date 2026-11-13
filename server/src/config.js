@@ -14,7 +14,7 @@ export const config = {
   port: num(process.env.PORT, 5178),
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
   isProduction: process.env.NODE_ENV === 'production',
-  jwtSecret: process.env.JWT_SECRET || 'raja-menswear-dev-secret-change-me',
+  jwtSecret: process.env.JWT_SECRET || 'laheri-collection-dev-secret-change-me',
   shopName: process.env.SHOP_NAME || 'Laheri Collection',
   shopAddress: process.env.SHOP_ADDRESS || 'Near Dariyapur Chauraha, In Front of Vishal Mega Mart, Sultanpur - 228001',
   shopPhone: process.env.SHOP_PHONE || '+91 7800509636',
@@ -36,7 +36,7 @@ export const config = {
     port: num(process.env.SMTP_PORT, 587),
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
-    from: process.env.MAIL_FROM || 'Raja Menswear <no-reply@example.com>',
+    from: process.env.MAIL_FROM || 'Laheri Collection <no-reply@example.com>',
   },
   twilio: {
     sid: process.env.TWILIO_ACCOUNT_SID || '',

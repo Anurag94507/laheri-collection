@@ -11,7 +11,7 @@ export default function ChatbotPage() {
     <div>
       <PageHero
         eyebrow="Shop assistant"
-        title="Ask Raja anything"
+        title="Ask Laheri anything"
         description="Our AI shop assistant knows the collections, the offers, the timings and the alteration policy. Type or speak — it replies in seconds, in English or Hinglish."
         compact
       />
@@ -43,7 +43,7 @@ export default function ChatbotPage() {
             <p className="flex items-center gap-2 font-medium text-navy"><IconMic size={15} className="text-gold-dark" /> Speak instead of typing</p>
             <p className="mt-1.5 leading-relaxed">Tap the microphone and ask your question. Chrome and Edge support voice input best.</p>
             <p className="mt-3 flex items-center gap-2 font-medium text-navy"><IconVolume size={15} className="text-gold-dark" /> Voice replies</p>
-            <p className="mt-1.5 leading-relaxed">Use the speaker button in the chat header to have Raja read replies aloud.</p>
+            <p className="mt-1.5 leading-relaxed">Use the speaker button in the chat header to have Laheri read replies aloud.</p>
           </div>
 
           <div className="rounded-2xl bg-navy p-5 text-parchment/65">

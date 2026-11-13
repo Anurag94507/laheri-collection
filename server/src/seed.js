@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { getDb } from './db/index.js';
 import { products as productSeed, PRODUCT_IMAGES } from './data/products.js';
 import { defaultSettings } from './services/settings.js';
@@ -15,21 +16,76 @@ const iso = (daysAgo, hour = 12) => {
 
 const db = await getDb();
 
-const collections = ['products', 'customers', 'orders', 'bills', 'coupons', 'gamePlays', 'chatLogs', 'campaigns', 'settings'];
+const collections = [
+  'products',
+  'customers',
+  'orders',
+  'bills',
+  'coupons',
+  'gamePlays',
+  'chatLogs',
+  'campaigns',
+  'settings',
+  'categories',
+  'accounts',
+  'bags',
+  'otps',
+];
 for (const name of collections) await db.replaceCollection(name, []);
 
 await db.replaceCollection('settings', [{ ...defaultSettings, updatedAt: iso(1) }]);
 
+await db.replaceCollection(
+  'categories',
+  defaultSettings.categories.map((category, index) => ({
+    _id: `cat_${index + 1}`,
+    ...category,
+    active: true,
+    createdAt: iso(30),
+  }))
+);
+
+const demoPasswordHash = (() => {
+  const salt = crypto.randomBytes(16).toString('hex');
+  return `${salt}:${crypto.scryptSync('laheri123', salt, 64).toString('hex')}`;
+})();
+
+// Real garment photography (from Unsplash) mapped to each style.
+const PHOTO_BY_SLUG = {
+  'kurta-royal': 'cloth-2',
+  'kurta-ivory': 'cloth-5',
+  'kurta-printed': 'cloth-12',
+  'kurta-olive': 'cloth-7',
+  'kurta-black': 'cloth-11',
+  'sherwani-ivory': 'cloth-16',
+  'sherwani-maroon': 'cloth-1',
+  'sherwani-indigo': 'cloth-3',
+  'sherwani-sage': 'cloth-1',
+  'formal-blue': 'cloth-4',
+  'formal-white': 'cloth-7',
+  'formal-check': 'cloth-5',
+  'formal-linen': 'cloth-2',
+  'casual-olive': 'cloth-9',
+  'casual-navy': 'cloth-6',
+  'casual-denim': 'cloth-12',
+  'casual-hoodie': 'cloth-10',
+  'festive-maroon': 'cloth-1',
+  'festive-gold': 'cloth-3',
+  'festive-green': 'cloth-16',
+  'dhoti-cream': null,
+  'dhoti-black': null,
+};
+
 const productDocs = productSeed.map((product) => {
   const { daysAgo, tone, accent, ...rest } = product;
+  const photo = PHOTO_BY_SLUG[product.slug];
   return {
     _id: `prd_${product.slug}`,
     ...rest,
     slug: product.slug,
-    images: [
-      `/images/products/${product.slug}.svg`,
-      ...PRODUCT_IMAGES.map((name) => `/images/fabric/${name}.svg`),
-    ],
+    images: photo
+      ? [`/images/photos/${photo}.jpg`, ...PRODUCT_IMAGES.map((name) => `/images/fabric/${name}.svg`)]
+      : [`/images/products/${product.slug}.svg`, ...PRODUCT_IMAGES.map((name) => `/images/fabric/${name}.svg`)],
     washCare: 'Gentle machine wash cold, or dry clean for silk and velvet. Iron on low heat.',
     createdAt: iso(daysAgo),
   };
@@ -79,6 +135,38 @@ const customerDocs = customers.map(([name, mobile, email, city, totalOrders, tot
       : null,
 }));
 await db.replaceCollection('customers', customerDocs);
+
+const accountDocs = customerDocs.map((customer, index) => ({
+  _id: `acc_${index + 1}`,
+  name: customer.name,
+  mobile: customer.mobile,
+  email: customer.email || '',
+  passwordHash: index === 0 ? demoPasswordHash : '',
+  verified: true,
+  createdAt: iso(40 + index),
+  lastLoginAt: iso(Math.max(1, 20 - index)),
+}));
+await db.replaceCollection('accounts', accountDocs);
+
+await db.replaceCollection('bags', [
+  {
+    _id: 'acc_2',
+    items: [
+      {
+        key: 'prd_kurta-royal::L',
+        productId: 'prd_kurta-royal',
+        name: bySlug['kurta-royal']?.name || 'Royal Indigo Cotton Kurta',
+        price: bySlug['kurta-royal']?.discountPrice || bySlug['kurta-royal']?.price || 2499,
+        image: '/images/products/kurta-royal.svg',
+        category: 'Kurta',
+        size: 'L',
+        quantity: 1,
+      },
+    ],
+    couponCode: '',
+    updatedAt: iso(1),
+  },
+]);
 
 const line = (slug, quantity, size) => {
   const product = bySlug[slug];
@@ -201,7 +289,11 @@ const orderDocs = orderSpecs.map(([name, mobile, email, items, status, daysAgo, 
     createdAt: iso(daysAgo, 13),
   };
 });
-await db.replaceCollection('orders', orderDocs);
+const linkedOrders = orderDocs.map((order) => {
+  const account = accountDocs.find((entry) => entry.mobile === order.customer.mobile);
+  return { ...order, accountId: account?._id || null };
+});
+await db.replaceCollection('orders', linkedOrders);
 
 const in48 = new Date(now + 2 * DAY).toISOString();
 const in24 = new Date(now + DAY).toISOString();

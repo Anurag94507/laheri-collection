@@ -88,7 +88,7 @@ export default function Home() {
             </div>
 
             <h1 className="mt-6 font-display text-[52px] leading-[0.92] text-surface sm:text-[72px] lg:text-[84px]">
-              <span className="shimmer-text">{shop?.name || 'Raja Menswear'}</span>
+              <span className="shimmer-text">{shop?.name || 'Laheri Collection'}</span>
               <span className="mt-3 block font-display text-[24px] font-light italic leading-tight text-parchment/85 sm:text-[30px]">
                 {shop?.tagline || 'Dressed for every occasion — walk in or order online'}
               </span>
@@ -326,7 +326,7 @@ export default function Home() {
       <section className="bg-white py-16 sm:py-20">
         <div className="container-x">
           <SectionHead
-            eyebrow={settings?.social?.handle || '@rajamenswear'}
+            eyebrow={settings?.social?.handle || '@laheri.collection'}
             title="From our shop floor"
             description="Daily drops, fabric close-ups and customer fittings on Instagram."
             action={
@@ -368,11 +368,11 @@ export default function Home() {
           </div>
           <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/95 to-navy/40" />
           <div className="relative max-w-lg">
-            <p className="eyebrow">Ask Raja</p>
+            <p className="eyebrow">Ask Laheri</p>
             <h2 className="mt-3 text-[32px] leading-tight text-surface sm:text-[40px]">Have a question? Our shop assistant is awake.</h2>
             <p className="mt-3 text-sm leading-relaxed text-parchment/60">
               Ask about fit, fabric, store timings, alterations or the right outfit for an occasion. Type or speak —
-              Raja replies in seconds, 24/7.
+              Laheri replies in seconds, 24/7.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={openChat} className="btn-gold">

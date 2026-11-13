@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useCustomer } from '../store/customer.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { lookupCustomer, placeOrder } from '../api/index.js';
 import { useSettings } from '../context/SettingsContext.jsx';
@@ -27,6 +28,7 @@ export default function Checkout() {
   const [confirmed, setConfirmed] = useState(null);
   const [errors, setErrors] = useState({});
   const [looking, setLooking] = useState(false);
+  const account = useCustomer((state) => state.account);
   const [form, setForm] = useState({
     name: '',
     mobile: '',
@@ -46,6 +48,15 @@ export default function Checkout() {
 
   useEffect(() => {
     if (settings?.shop?.city && !form.city) setForm((current) => ({ ...current, city: settings.shop.city }));
+    // Prefill from the signed-in customer account so checkout is one tap.
+    if (account) {
+      setForm((current) => ({
+        ...current,
+        name: current.name || account.name || '',
+        mobile: current.mobile || account.mobile || '',
+        email: current.email || account.email || '',
+      }));
+    }
   }, [settings?.shop?.city]);
 
   if (items.length === 0 && !confirmed) {

@@ -6,11 +6,13 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { config } from './config.js';
 import { errorHandler, notFound } from './middleware/error.js';
+import accountRoutes from './routes/account.js';
 import adminRoutes from './routes/admin.js';
 import authRoutes from './routes/auth.js';
 import billRoutes from './routes/bills.js';
 import bulkRoutes from './routes/bulk.js';
 import chatbotRoutes from './routes/chatbot.js';
+import categoryRoutes from './routes/categories.js';
 import couponRoutes from './routes/coupons.js';
 import customerRoutes from './routes/customers.js';
 import gameRoutes from './routes/games.js';
@@ -55,6 +57,8 @@ const chatbotLimiter = rateLimit({
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/account', accountRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/coupons', couponRoutes);

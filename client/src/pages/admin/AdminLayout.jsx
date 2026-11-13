@@ -7,6 +7,7 @@ import {
   IconClose,
   IconDashboard,
   IconGift,
+  IconGrid,
   IconLogout,
   IconMenu,
   IconPackage,
@@ -21,10 +22,12 @@ const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: IconDashboard },
   { to: '/admin/billing', label: 'Offline billing', icon: IconReceipt },
   { to: '/admin/products', label: 'Products', icon: IconPackage },
+  { to: '/admin/categories', label: 'Categories', icon: IconGrid },
   { to: '/admin/orders', label: 'Online orders', icon: IconTag },
   { to: '/admin/customers', label: 'Customers · CRM', icon: IconUsers },
+  { to: '/admin/chat-logs', label: 'Chatbot chats', icon: IconChat },
   { to: '/admin/bulk-send', label: 'Bulk messaging', icon: IconChat },
-  { to: '/admin/games', label: 'Game coupons', icon: IconGift },
+  { to: '/admin/games', label: 'Games & offers', icon: IconGift },
   { to: '/admin/settings', label: 'Shop settings', icon: IconSettings },
 ];
 
@@ -32,10 +35,12 @@ const pageTitles = {
   '/admin/dashboard': { title: 'Dashboard', subtitle: 'Today at the shop' },
   '/admin/billing': { title: 'Offline billing', subtitle: 'Create a bill for a walk-in customer' },
   '/admin/products': { title: 'Products', subtitle: 'Catalogue, pricing and stock' },
+  '/admin/categories': { title: 'Categories', subtitle: 'Add and organise shop categories' },
   '/admin/orders': { title: 'Online orders', subtitle: 'Pack, dispatch and update customers' },
   '/admin/customers': { title: 'Customers', subtitle: 'Every contact, one CRM' },
-  '/admin/bulk-send': { title: 'Bulk messaging', subtitle: 'WhatsApp, SMS and email campaigns' },
-  '/admin/games': { title: 'Game coupons', subtitle: 'Codes won on the website' },
+  '/admin/chat-logs': { title: 'Chatbot chats', subtitle: 'What customers asked the assistant' },
+  '/admin/bulk-send': { title: 'Bulk messaging', subtitle: 'One-click WhatsApp broadcast' },
+  '/admin/games': { title: 'Games & offers', subtitle: 'Prizes, discounts and game switches' },
   '/admin/settings': { title: 'Shop settings', subtitle: 'Shop details, offers and chatbot' },
 };
 
@@ -56,9 +61,9 @@ export default function AdminLayout() {
   const sidebar = (
     <div className="flex h-full flex-col">
       <Link to="/admin/dashboard" className="flex items-center gap-3 px-5 py-6">
-        <span className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/50 font-display text-xl text-gold">R</span>
+        <img src="/logo.svg" alt="" className="h-11 w-11 rounded-full ring-1 ring-gold/40" />
         <div>
-          <p className="font-display text-xl leading-none text-surface">{settings?.shop?.name || 'Raja Menswear'}</p>
+          <p className="font-display text-xl leading-none text-surface">{settings?.shop?.name || 'Laheri Collection'}</p>
           <p className="mt-1 text-[9px] uppercase tracking-[0.24em] text-parchment/40">Shopkeeper console</p>
         </div>
       </Link>

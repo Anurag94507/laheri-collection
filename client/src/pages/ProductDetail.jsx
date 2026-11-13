@@ -89,7 +89,7 @@ export default function ProductDetail() {
   const images = product.images?.length ? product.images : ['/images/products/kurta-royal.svg'];
   const shop = settings?.shop;
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const waShare = `https://wa.me/?text=${encodeURIComponent(`Check this out from ${shop?.name || 'Raja Menswear'}: ${product.name} — ${shareUrl}`)}`;
+  const waShare = `https://wa.me/?text=${encodeURIComponent(`Check this out from ${shop?.name || 'Laheri Collection'}: ${product.name} — ${shareUrl}`)}`;
 
   const add = () => {
     if (Number(product.stock) <= 0) {

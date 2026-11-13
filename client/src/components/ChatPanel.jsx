@@ -13,10 +13,10 @@ const newId = () =>
 
 const readSession = () => {
   try {
-    const existing = sessionStorage.getItem('raja-chat-session');
+    const existing = sessionStorage.getItem('laheri-chat-session');
     if (existing) return existing;
     const created = newId();
-    sessionStorage.setItem('raja-chat-session', created);
+    sessionStorage.setItem('laheri-chat-session', created);
     return created;
   } catch {
     return newId();
@@ -25,7 +25,7 @@ const readSession = () => {
 
 export default function ChatPanel({ compact = false }) {
   const { settings } = useSettings();
-  const welcome = settings?.chatbot?.welcome || 'Namaste! Main Raja hoon, aapka shop assistant. Kaise madad kar sakta hoon?';
+  const welcome = settings?.chatbot?.welcome || 'Namaste! Main Laheri hoon, aapka shop assistant. Kaise madad kar sakta hoon?';
   const [messages, setMessages] = useState([{ id: 'welcome', role: 'assistant', content: welcome }]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -136,7 +136,7 @@ export default function ChatPanel({ compact = false }) {
               <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-navy bg-success" />
             </span>
             <div>
-              <p className="font-display text-lg leading-none">Raja</p>
+              <p className="font-display text-lg leading-none">Laheri</p>
               <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-parchment/60">Shop assistant · online</p>
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function ChatPanel({ compact = false }) {
               listening ? 'animate-pulse border-error bg-error text-white' : 'border-navy/15 text-navy/60 hover:border-gold hover:text-navy'
             }`}
             aria-label="Voice input"
-            title="Speak to Raja"
+            title="Speak to Laheri"
           >
             <IconMic size={17} />
           </button>

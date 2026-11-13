@@ -45,9 +45,9 @@ export default function AdminLogin() {
         <div className="absolute inset-0 bg-gradient-to-br from-navy via-navy/90 to-navy/50" />
 
         <Link to="/" className="relative flex items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/60 font-display text-2xl text-gold">R</span>
+          <img src="/logo.svg" alt="" className="h-12 w-12 rounded-full ring-1 ring-gold/40" />
           <div>
-            <p className="font-display text-2xl">Raja Menswear</p>
+            <p className="font-display text-2xl">Laheri Collection</p>
             <p className="text-[9px] uppercase tracking-[0.3em] text-parchment/50">Shop operations</p>
           </div>
         </Link>

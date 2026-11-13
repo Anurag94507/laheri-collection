@@ -62,7 +62,7 @@ export default function ChatWidget() {
             <IconChat size={17} />
             <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse-soft rounded-full border-2 border-navy bg-success" />
           </span>
-          <span className="hidden text-xs font-medium tracking-wide sm:block">Ask Raja</span>
+          <span className="hidden text-xs font-medium tracking-wide sm:block">Ask Laheri</span>
         </button>
       )}
     </>

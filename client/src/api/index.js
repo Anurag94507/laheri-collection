@@ -53,3 +53,29 @@ export const getCampaignLogs = () => api.get('/bulk/logs').then((response) => re
 export const getGameCoupons = () => api.get('/games/coupons').then((response) => response.data);
 export const getCoupons = () => api.get('/coupons').then((response) => response.data);
 export const updateSettings = (payload) => api.put('/settings', payload).then((response) => response.data);
+
+/* ---------- Customer account / OTP ---------- */
+export const requestOtp = (payload) => api.post('/account/request-otp', payload).then((response) => response.data);
+export const verifyOtp = (payload) => api.post('/account/verify-otp', payload).then((response) => response.data);
+export const customerPasswordLogin = (payload) =>
+  api.post('/account/login-password', payload).then((response) => response.data);
+export const customerMe = () => api.get('/account/me').then((response) => response.data.account);
+export const customerLogout = () => api.post('/account/logout').then((response) => response.data);
+export const updateCustomerProfile = (payload) => api.put('/account/profile', payload).then((response) => response.data);
+export const setCustomerPassword = (payload) => api.post('/account/set-password', payload).then((response) => response.data);
+export const resetCustomerPassword = (payload) => api.post('/account/reset-password', payload).then((response) => response.data);
+export const getMyBag = () => api.get('/account/bag').then((response) => response.data);
+export const saveMyBag = (payload) => api.put('/account/bag', payload).then((response) => response.data);
+export const getMyOrders = () => api.get('/account/orders').then((response) => response.data);
+
+/* ---------- Admin: categories, chats, bags, games ---------- */
+export const getAdminCategories = () => api.get('/categories/admin').then((response) => response.data);
+export const createCategory = (payload) => api.post('/categories', payload).then((response) => response.data);
+export const updateCategory = (id, payload) => api.put(`/categories/${id}`, payload).then((response) => response.data);
+export const deleteCategory = (id) => api.delete(`/categories/${id}`).then((response) => response.data);
+export const getChatLogs = (params) => api.get('/chatbot/logs', { params }).then((response) => response.data);
+export const getGameConfig = () => api.get('/games/config').then((response) => response.data);
+export const updateGameConfig = (payload) => api.put('/games/config', payload).then((response) => response.data);
+export const sendWhatsAppToAll = (payload) => api.post('/bulk/send-all', payload).then((response) => response.data);
+export const getAdminBags = () => api.get('/admin/bags').then((response) => response.data);
+export const getAdminAccounts = () => api.get('/admin/accounts').then((response) => response.data);

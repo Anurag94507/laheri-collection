@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { cartCount, useCart } from '../store/cart.js';
 import { useChat } from '../store/chat.js';
 import { useSettings } from '../context/SettingsContext.jsx';
-import { IconBag, IconChat, IconClose, IconLock, IconMenu } from './Icons.jsx';
+import { IconBag, IconChat, IconClose, IconLock, IconMenu, IconUser } from './Icons.jsx';
 
 const links = [
   { to: '/', label: 'Home', end: true },
@@ -12,7 +12,7 @@ const links = [
   { to: '/offers', label: 'Offers' },
   { to: '/spin-wheel', label: 'Play & Win' },
   { to: '/track', label: 'Track Order' },
-  { to: '/chatbot', label: 'Ask Raja' },
+  { to: '/chatbot', label: 'Ask Laheri' },
 ];
 
 export default function Navbar() {
@@ -54,12 +54,14 @@ export default function Navbar() {
       >
         <div className="container-x flex h-[72px] items-center justify-between gap-4">
           <Link to="/" className="group flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/60 bg-navy font-display text-xl text-gold transition group-hover:bg-gold group-hover:text-navy">
-              R
-            </span>
+            <img
+              src="/logo.svg"
+              alt={`${settings?.shop?.name || 'Laheri Collection'} logo`}
+              className="h-11 w-11 rounded-full ring-1 ring-gold/40 transition group-hover:ring-gold"
+            />
             <span className="leading-none">
               <span className="block font-display text-[22px] font-semibold tracking-wide text-navy">
-                {settings?.shop?.name || 'Raja Menswear'}
+                {settings?.shop?.name || 'Laheri Collection'}
               </span>
               <span className="mt-1 block text-[9px] uppercase tracking-[0.32em] text-ink/45">
                 Est. {settings?.shop?.established || 1998} · {settings?.shop?.city || 'Lucknow'}
@@ -93,6 +95,13 @@ export default function Navbar() {
             >
               <IconChat size={18} />
             </button>
+            <Link
+              to="/account"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-navy/10 text-navy/70 transition hover:border-gold hover:text-navy"
+              aria-label="My account"
+            >
+              <IconUser size={17} />
+            </Link>
             <Link
               to="/admin/login"
               className="hidden h-10 w-10 items-center justify-center rounded-full border border-navy/10 text-navy/70 transition hover:border-gold hover:text-navy sm:flex"
@@ -151,12 +160,17 @@ export default function Navbar() {
                     View bag
                   </Link>
                   <button type="button" onClick={openChat} className="btn-outline btn-sm flex-1">
-                    Ask Raja
+                    Ask Laheri
                   </button>
                 </div>
-                <Link to="/admin/login" className="pb-4 text-xs text-ink/50">
-                  Shopkeeper login →
-                </Link>
+                <div className="flex items-center justify-between border-t border-navy/5 py-4 text-xs text-ink/50">
+                  <Link to="/account" className="font-medium text-navy">
+                    My account · bag & orders
+                  </Link>
+                  <Link to="/admin/login">
+                    Shopkeeper login →
+                  </Link>
+                </div>
               </div>
             </motion.div>
           )}
