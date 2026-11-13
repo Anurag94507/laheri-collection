@@ -31,6 +31,7 @@ export default function AccountLogin() {
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [devCode, setDevCode] = useState('');
+  const [relay, setRelay] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const isEmail = identifier.includes('@');
@@ -54,6 +55,7 @@ export default function AccountLogin() {
         purpose: purposes,
       });
       setDevCode(result.devCode || '');
+      setRelay(!result.senderConfigured);
       setCode('');
       setStep('code');
       toast.success(result.message || 'Code sent.');
@@ -258,7 +260,16 @@ export default function AccountLogin() {
               ) : (
                 <form onSubmit={submitCode} className="space-y-4">
                   <p className="rounded-xl bg-navy/5 px-4 py-3 text-xs leading-relaxed text-navy/60">
-                    Code sent to <span className="font-semibold text-navy">{identifier}</span>.
+                    {relay ? (
+                      <>
+                        Ask the shop on WhatsApp for the code for{' '}
+                        <span className="font-semibold text-navy">{identifier}</span> — it is ready now and lasts 5 minutes.
+                      </>
+                    ) : (
+                      <>
+                        Code sent to <span className="font-semibold text-navy">{identifier}</span>.
+                      </>
+                    )}
                     {devCode && (
                       <>
                         {' '}

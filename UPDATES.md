@@ -125,3 +125,22 @@ Production environment:
 - Verified on production: old password 401, wrong username 401, new password 200; OTP response has no code;
   `/api/admin/otp-codes` 401 without a session and returns the pending code to the admin; that code signs the
   customer in; order placed. Preview re-checked with the same results.
+
+## 13. Real OTP delivery, auto-hidden relay panel, admin login throttle
+- `worker/notify.js` adds direct delivery adapters, selected by which secrets exist:
+  `MSG91_AUTH_KEY` + `MSG91_TEMPLATE_ID` (SMS, India), `TWILIO_ACCOUNT_SID` + `TWILIO_AUTH_TOKEN` +
+  `TWILIO_FROM` (SMS) and/or `TWILIO_WHATSAPP_FROM` (WhatsApp), `RESEND_API_KEY` + `MAIL_FROM` (email).
+  Each request has an 8s timeout and provider errors are surfaced without leaking secrets.
+- MSG91 answers HTTP 200 even when it refuses a send, so the response body is checked, not just the status.
+- `request-otp` now reports honestly: `senderConfigured` and `delivered`. With no sender it says the code is ready
+  and the customer messages the shop on WhatsApp; a provider failure returns 502 instead of a silent "sent".
+- `GET /api/admin/otp-codes` returns `senderConfigured: true` and an empty list once any sender is configured,
+  and the Dashboard "Login codes" panel hides itself on that flag.
+- Admin login is throttled per client IP in D1 (`loginAttempts`): 5 wrong passwords in a 10 minute window returns
+  429 with `Retry-After` for the rest of the window; a successful login clears the counter.
+- Verified: adapter URL/body/auth assertions and error paths via `scripts/verify-notify.mjs`; production still in
+  relay mode (`senderConfigured:false`, `delivered:false`, no code leaked, relay sign-in works); preview locked out
+  after the 5th wrong password (6th → 429, `Retry-After: 597`, correct password also 429 while locked) while
+  production admin login stayed 200 — the counters live in each environment's own database.
+- Not yet exercised live: delivery to a real phone/email, and the panel hiding, both need provider keys in
+  Sites → Secrets. Preview admin login from this machine stays locked until the 10 minute window expires.

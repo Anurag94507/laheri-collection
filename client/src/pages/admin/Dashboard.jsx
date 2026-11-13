@@ -22,18 +22,23 @@ const STAT_TEMPLATES = [
 function LoginCodes() {
   const [codes, setCodes] = useState([]);
   const [state, setState] = useState('loading');
+  const [hidden, setHidden] = useState(false);
 
   const load = () => {
     setState('loading');
     getLoginCodes()
       .then((data) => {
         setCodes(data.codes || []);
+        setHidden(Boolean(data.senderConfigured));
         setState('ready');
       })
       .catch(() => setState('error'));
   };
 
   useEffect(load, []);
+
+  // Customers receive their own codes once a sender is set up, so this panel goes away.
+  if (hidden) return null;
 
   return (
     <div className="admin-card">

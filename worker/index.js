@@ -1,4 +1,5 @@
 import { SEED_CATEGORIES, SEED_CUSTOMERS, SEED_PRODUCTS, SEED_SETTINGS } from './seed-data.js';
+import { deliveryStatus, sendCode } from './notify.js';
 
 /* ------------------------------------------------------------------ */
 /* helpers                                                             */
@@ -17,6 +18,10 @@ const digits = (value) => String(value || '').replace(/\D/g, '').slice(-10);
 const isMobile = (value) => /^[6-9]\d{9}$/.test(digits(value));
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || ''));
 const nowIso = () => new Date().toISOString();
+
+// Admin sign-in throttle: this many wrong passwords locks that IP for the window.
+const ADMIN_MAX_FAILS = 5;
+const ADMIN_LOCK_MS = 10 * 60 * 1000;
 
 const enc = new TextEncoder();
 
@@ -709,8 +714,36 @@ async function handleApi(request, env, url) {
       // falling back to a password everybody knows.
       if (password.length < 12)
         return fail(503, 'Admin login is not configured for this shop yet.');
-      if (String(input.username || '').trim() !== username || String(input.password || '') !== password)
+
+      // Throttle wrong passwords per client IP so nobody can grind the console.
+      const attemptId = `admin:${request.headers.get('CF-Connecting-IP') || 'unknown'}`;
+      const attempt = await getDoc(env, 'loginAttempts', attemptId);
+      const lockedUntil = attempt?.lockedUntil ? new Date(attempt.lockedUntil).getTime() : 0;
+      if (lockedUntil > Date.now()) {
+        const wait = Math.ceil((lockedUntil - Date.now()) / 1000);
+        return json(
+          { error: `Too many failed sign-ins. Try again in ${Math.ceil(wait / 60)} minute(s).` },
+          429,
+          { 'retry-after': String(wait) }
+        );
+      }
+
+      const matches =
+        String(input.username || '').trim() === username && String(input.password || '') === password;
+      if (!matches) {
+        const windowOpen = attempt?.firstAt && Date.now() - new Date(attempt.firstAt).getTime() < ADMIN_LOCK_MS;
+        const count = (windowOpen ? attempt.count : 0) + 1;
+        await putDoc(env, 'loginAttempts', {
+          _id: attemptId,
+          count,
+          firstAt: windowOpen ? attempt.firstAt : nowIso(),
+          lockedUntil: count >= ADMIN_MAX_FAILS ? new Date(Date.now() + ADMIN_LOCK_MS).toISOString() : null,
+          updatedAt: nowIso(),
+        });
         return fail(401, 'Invalid username or password.');
+      }
+      if (attempt) await deleteDoc(env, 'loginAttempts', attemptId);
+
       const token = await signToken(
         { sub: username, role: 'admin', exp: Math.floor(Date.now() / 1000) + 86400 },
         SECRET(env)
@@ -777,19 +810,44 @@ async function handleApi(request, env, url) {
         createdAt: nowIso(),
       });
 
+      // Send it for real when a provider is configured; otherwise the shop relays it.
+      const delivery = deliveryStatus(env);
+      let sent = false;
+      let provider = null;
+      if (delivery.configured) {
+        try {
+          const result = await sendCode(env, { channel, identifier, code });
+          sent = true;
+          provider = result.provider;
+        } catch (error) {
+          console.error('otp_delivery_failed', error?.message || error);
+          return json(
+            {
+              ok: false,
+              senderConfigured: true,
+              error: 'We could not send your code just now. Please try again, or call the shop on WhatsApp.',
+            },
+            502
+          );
+        }
+      }
+
       return json({
         ok: true,
         identifier,
         type: emailMode ? 'email' : 'mobile',
         channel,
         purpose,
-        delivered: true,
+        delivered: sent,
+        senderConfigured: delivery.configured,
+        provider,
         expiresInSeconds: 300,
         // Codes are never returned by a deployed build. Only a local dev Worker with
-        // OTP_DEBUG=true echoes the code back; the shop relays real codes from the
-        // admin console (GET /api/admin/otp-codes).
+        // OTP_DEBUG=true echoes the code back.
         devCode: env.OTP_DEBUG === 'true' ? code : undefined,
-        message: `A 6-digit code was sent to ${identifier}.`,
+        message: sent
+          ? `A 6-digit code was sent to ${identifier}.`
+          : 'Your code is ready. Message the shop on WhatsApp and we will share it.',
       });
     }
 
@@ -1566,6 +1624,10 @@ async function handleApi(request, env, url) {
     if (rest[0] === 'otp-codes' && method === 'GET') {
       // Sign-in codes are delivered out of band: staff read them here and send them to
       // the customer on WhatsApp. Only unexpired, unused codes are listed.
+      // Once a sender is configured customers get their own codes, so staff no longer
+      // need (or get) to see them.
+      if (deliveryStatus(env).configured)
+        return json({ codes: [], total: 0, senderConfigured: true });
       const codes = await listDocs(env, 'otps');
       const now = Date.now();
       const pending = codes
@@ -1582,7 +1644,7 @@ async function handleApi(request, env, url) {
           createdAt,
           expiresAt,
         }));
-      return json({ codes: pending, total: pending.length });
+      return json({ codes: pending, total: pending.length, senderConfigured: false });
     }
     if (rest[0] === 'stats' && method === 'GET') {
       const [bills, orders, customers, products, campaigns, chatLogs] = await Promise.all([

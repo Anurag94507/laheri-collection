@@ -11,6 +11,11 @@
       "name": "seed-data.js",
       "type": "esm",
       "path": "./worker/seed-data.js"
+    },
+    {
+      "name": "notify.js",
+      "type": "esm",
+      "path": "./worker/notify.js"
     }
   ],
   "assetsDirectory": "./client/dist",
