@@ -33,6 +33,7 @@ export default function AccountLogin() {
   const [devCode, setDevCode] = useState('');
   const [relay, setRelay] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [name, setName] = useState(''); // Customer name
 
   const isEmail = identifier.includes('@');
 
@@ -51,6 +52,7 @@ export default function AccountLogin() {
       const purposes = mode === 'reset' ? 'reset' : 'login';
       const result = await requestOtp({
         identifier: identifier.trim(),
+        name: name.trim(),
         channel: isEmail ? 'email' : channel,
         purpose: purposes,
       });
@@ -136,6 +138,11 @@ export default function AccountLogin() {
             Browse the collection freely — login is only needed to save your bag, place an order and see
             your past purchases.
           </p>
+          {account?.name && (
+            <p className="mt-2 text-[11px] text-ink/50">
+              Welcome back, {account.name.split(' ')[0]}!
+            </p>
+          )}
         </div>
 
         <div className="px-7 py-7">
@@ -214,15 +221,34 @@ export default function AccountLogin() {
                   )}
                   <label className="block">
                     <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-navy/50">
-                      Mobile number or email
+                      Name (optional but recommended)
                     </span>
-                    <input
-                      value={identifier}
-                      onChange={(event) => setIdentifier(event.target.value)}
-                      className="input"
-                      placeholder="98765 43210 or you@example.com"
-                      autoComplete="username"
-                    />
+                    <div className="grid grid-cols-2 gap-3">
+                    <label className="block">
+                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-navy/50">
+                        Name
+                      </span>
+                      <input
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                        className="input"
+                        placeholder="Your name"
+                        autoComplete="name"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-navy/50">
+                        Mobile number or email
+                      </span>
+                      <input
+                        value={identifier}
+                        onChange={(event) => setIdentifier(event.target.value)}
+                        className="input"
+                        placeholder="98765 43210 or you@example.com"
+                        autoComplete="username"
+                      />
+                    </label>
+                  </div>
                   </label>
 
                   {!isEmail && (

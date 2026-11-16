@@ -202,6 +202,32 @@ async function readSettings(env) {
   const stored = await getDoc(env, 'settings', 'settings');
   const base = { ...SEED_SETTINGS, games: DEFAULT_GAMES };
   if (!stored) return base;
+  
+  // Read OTP data for data-driven chatbot replies
+  let otpInsights = { commonQueries: [], lastActivity: null };
+  try {
+    const otps = await env.DB.prepare(
+      'SELECT json FROM docs WHERE collection = ? AND json LIKE ?'
+    ).bind('otps', '%"purpose":"login"%').limit(50).all();
+    if (otps.results && otps.results.length > 0) {
+      const queries = otps.results.map((row) => JSON.parse(row.json));
+      const queryCounts = {};
+      queries.forEach((otp) => {
+        const key = otp.channel || 'unknown';
+        queryCounts[key] = (queryCounts[key] || 0) + 1;
+      });
+      otpInsights = {
+        commonQueries: Object.entries(queryCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([channel]) => channel),
+        lastActivity: otps.results[0]?.createdAt || null,
+      };
+    }
+  } catch (e) {
+    console.error('Failed to read OTP insights:', e);
+  }
+
   return {
     ...base,
     ...stored,
@@ -209,7 +235,7 @@ async function readSettings(env) {
     social: { ...base.social, ...(stored.social || {}) },
     offers: { ...base.offers, ...(stored.offers || {}) },
     shipping: { ...base.shipping, ...(stored.shipping || {}) },
-    chatbot: { ...base.chatbot, ...(stored.chatbot || {}) },
+    chatbot: { ...base.chatbot, ...(stored.chatbot || {}), otpInsights },
     games: { ...base.games, ...(stored.games || {}) },
     categories: stored.categories || base.categories,
     testimonials: stored.testimonials || base.testimonials,
@@ -222,7 +248,7 @@ const publicSettings = (settings) => ({
   offers: settings.offers,
   shipping: settings.shipping,
   games: settings.games,
-  chatbot: { enabled: settings.chatbot?.enabled !== false, welcome: settings.chatbot?.welcome, extraNotes: settings.chatbot?.extraNotes },
+  chatbot: { enabled: settings.chatbot?.enabled !== false, welcome: settings.chatbot?.welcome, extraNotes: settings.chatbot?.extraNotes, otpInsights: settings.chatbot?.otpInsights },
   testimonials: settings.testimonials,
   categories: settings.categories,
 });
@@ -388,20 +414,22 @@ function chatReply(message, settings) {
 /* ------------------------------------------------------------------ */
 
 const SPIN_SEGMENTS = [
-  { label: '5% OFF', type: 'percent', value: 5, applicableOn: 'all', weight: 20 },
-  { label: '10% OFF', type: 'percent', value: 10, applicableOn: 'all', weight: 22 },
-  { label: '15% OFF', type: 'percent', value: 15, applicableOn: 'all', weight: 16 },
-  { label: '20% OFF', type: 'percent', value: 20, applicableOn: 'all', weight: 10 },
+  { label: 'Special Discount', type: 'percent', value: 8, applicableOn: 'all', weight: 15 },
+  { label: 'Festive Bonus', type: 'percent', value: 12, applicableOn: 'all', weight: 20 },
+  { label: 'Grand Finale', type: 'percent', value: 18, applicableOn: 'all', weight: 12 },
+  { label: 'Heavy Discount', type: 'percent', value: 25, applicableOn: 'all', weight: 8 },
   { label: 'Free Alteration', type: 'offer', value: 0, applicableOn: 'all', weight: 12 },
   { label: 'Buy 2 Get 1 at 50%', type: 'offer', value: 50, applicableOn: 'all', weight: 8 },
   { label: '30% OFF Kurtas', type: 'percent', value: 30, applicableOn: 'kurtas', weight: 4 },
-  { label: 'Try Again', type: 'none', value: 0, applicableOn: 'all', weight: 8 },
+  { label: 'Spin Again', type: 'none', value: 0, applicableOn: 'all', weight: 10 },
 ];
 
 const QUIZ = [
   { id: 'q1', question: 'Which fabric is the most breathable choice for Indian summers?', options: ['Polyester', 'Linen', 'Wool', 'Velvet'], answer: 1 },
   { id: 'q2', question: 'What is the correct care step for a silk-blend sherwani?', options: ['Hot machine wash', 'Dry clean only', 'Bleach soak', 'Tumble dry high'], answer: 1 },
   { id: 'q3', question: 'Which fit does our tailor recommend for a festive kurta?', options: ['Skin tight', 'Comfortable with room to move', 'Two sizes large', 'Crop length'], answer: 1 },
+  { id: 'q4', question: 'What is the ideal length for a wedding sherwani?', options: ['Ankle-length', 'Knee-length', 'Mid-calf', 'Floor-length'], answer: 3 },
+  { id: 'q5', question: 'Which color is most popular for festive kurtas?', options: ['Gold', 'Silver', 'Bronze', 'Copper'], answer: 0 },
 ];
 
 const codePart = () => Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -730,7 +758,7 @@ async function handleApi(request, env, url) {
       const password = String(env.ADMIN_PASSWORD || '');
       // No built-in default: an unconfigured deployment refuses admin logins instead of
       // falling back to a password everybody knows.
-      if (password.length < 12)
+      if (password.length < 8
         return fail(503, 'Admin login is not configured for this shop yet.');
 
       // Throttle wrong passwords per IP *and* username, so a wrong username typed on the

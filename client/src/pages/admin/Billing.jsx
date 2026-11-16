@@ -246,6 +246,16 @@ export default function Billing() {
                 <IconWhatsApp size={14} /> Open WhatsApp receipt
               </a>
             )}
+            {result.bill._id && (
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="btn-outline btn-sm mt-2"
+                aria-label="Print bill"
+              >
+                Print bill
+              </button>
+            )}
           </div>
         )}
       </form>
