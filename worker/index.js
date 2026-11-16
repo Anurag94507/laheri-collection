@@ -378,64 +378,35 @@ function chatReply(message, settings) {
   const text = String(message || '').toLowerCase();
   const shop = settings.shop;
   const has = (...words) => words.some((word) => text.includes(word));
-  const hasAny = (wordGroups) => wordGroups.some(group => has(...group));
 
   if (!text.trim()) return 'Kuch bhi poochhiye — size, fabric, delivery ya offers.';
-
-  // Greeting
   if (has('hello', 'hi ', 'hey', 'namaste', 'namaskar', 'salaam'))
     return `Namaste! ${shop.name} mein aapka swagat hai. Kurta, sherwani, formal shirts aur festive wear available hai. Kya dekhna chahenge?`;
-
-  // Timings
   if (has('time', 'timing', 'open', 'band', 'khul'))
     return `Shop timings: ${(shop.hours || []).map((slot) => `${slot.days} ${slot.time}`).join(', ')}. Address: ${shop.address}.`;
-
-  // Address/Location
   if (has('address', 'location', 'kahan', 'where', 'shop'))
     return `Hamari shop ${shop.address}, ${shop.city} - ${shop.pincode} par hai. Google Maps: ${shop.mapsLink}`;
-
-  // Sherwani/Wedding
   if (has('sherwani', 'wedding', 'shaadi', 'groom'))
     return 'Wedding aur sangeet ke liye sherwani ₹4,999 se shuru hai — ivory, maroon, indigo aur sage shades stock mein hain. Free alteration 3 din mein.';
-
-  // Kurta/Festive
   if (has('kurta', 'festive'))
     return 'Kurtas ₹999 se ₹2,999 tak — cotton, linen aur chikankari. Festive rack par flat 20% off chal raha hai.';
-
-  // Price/Budget
   if (has('price', 'kitna', 'rate', 'cost', 'budget'))
     return 'Budget ke hisaab se: kurtas ₹999+, formal shirts ₹1,299+, sherwani ₹4,999+. Sale section mein 30% tak off hai.';
-
-  // Alteration/Fit
   if (has('alter', 'fitting', 'fit', 'size'))
     return 'Alteration free hai aur 2–3 din mein ready hoti hai. Size guide product page par available hai — S se XXL tak.';
-
-  // Delivery
   if (has('deliver', 'shipping', 'courier', 'kab tak'))
     return `Delivery ${settings.shipping.deliveryDays} mein hoti hai. ₹${settings.shipping.freeAbove} se upar free delivery. Store pickup 2 ghante mein ready.`;
-
-  // Payment
   if (has('payment', 'upi', 'card', 'cod', 'cash'))
     return 'Payment: UPI, debit/credit card, net banking aur COD. Shop par cash bhi chalega.';
-
-  // Offers/Discounts
   if (has('offer', 'discount', 'coupon', 'code'))
     return `Chal raha offer: ${settings.offers?.title || 'festive sale'} — code ${settings.offers?.code || 'FESTIVE20'}. Spin wheel aur puzzle khel kar bhi coupon jeet sakte hain.`;
-
-  // Returns/Exchange
   if (has('return', 'exchange', 'refund'))
     return 'Exchange 7 din ke andar bill ke saath. Sale items final sale hain.';
-
-  // Order/Track
   if (has('order', 'track', 'status'))
     return 'Order track karne ke liye order ID daaliye "Track order" page par. WhatsApp par bhi update milta hai.';
-
-  // Contact
   if (has('contact', 'phone', 'whatsapp', 'call'))
     return `Call ya WhatsApp: ${shop.phone}. Email: ${shop.email}.`;
-
-  // Default human-like response with suggestions
-  return `Main ${shop.name} ka assistant hoon. Aap poochh sakte hain: kurta/sherwani collection, price, size, alteration, delivery, offers ya shop ka address. Kuch bhi poochh sakte hain!`;
+  return `Main ${shop.name} ka assistant hoon. Aap poochh sakte hain: kurta/sherwani collection, price, size, alteration, delivery, offers ya shop ka address.`;
 }
 
 /* ------------------------------------------------------------------ */
