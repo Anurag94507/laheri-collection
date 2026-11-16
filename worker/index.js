@@ -378,35 +378,64 @@ function chatReply(message, settings) {
   const text = String(message || '').toLowerCase();
   const shop = settings.shop;
   const has = (...words) => words.some((word) => text.includes(word));
+  const hasAny = (wordGroups) => wordGroups.some(group => has(...group));
 
   if (!text.trim()) return 'Kuch bhi poochhiye — size, fabric, delivery ya offers.';
+
+  // Greeting
   if (has('hello', 'hi ', 'hey', 'namaste', 'namaskar', 'salaam'))
     return `Namaste! ${shop.name} mein aapka swagat hai. Kurta, sherwani, formal shirts aur festive wear available hai. Kya dekhna chahenge?`;
+
+  // Timings
   if (has('time', 'timing', 'open', 'band', 'khul'))
     return `Shop timings: ${(shop.hours || []).map((slot) => `${slot.days} ${slot.time}`).join(', ')}. Address: ${shop.address}.`;
+
+  // Address/Location
   if (has('address', 'location', 'kahan', 'where', 'shop'))
     return `Hamari shop ${shop.address}, ${shop.city} - ${shop.pincode} par hai. Google Maps: ${shop.mapsLink}`;
+
+  // Sherwani/Wedding
   if (has('sherwani', 'wedding', 'shaadi', 'groom'))
     return 'Wedding aur sangeet ke liye sherwani ₹4,999 se shuru hai — ivory, maroon, indigo aur sage shades stock mein hain. Free alteration 3 din mein.';
+
+  // Kurta/Festive
   if (has('kurta', 'festive'))
     return 'Kurtas ₹999 se ₹2,999 tak — cotton, linen aur chikankari. Festive rack par flat 20% off chal raha hai.';
+
+  // Price/Budget
   if (has('price', 'kitna', 'rate', 'cost', 'budget'))
     return 'Budget ke hisaab se: kurtas ₹999+, formal shirts ₹1,299+, sherwani ₹4,999+. Sale section mein 30% tak off hai.';
+
+  // Alteration/Fit
   if (has('alter', 'fitting', 'fit', 'size'))
     return 'Alteration free hai aur 2–3 din mein ready hoti hai. Size guide product page par available hai — S se XXL tak.';
+
+  // Delivery
   if (has('deliver', 'shipping', 'courier', 'kab tak'))
     return `Delivery ${settings.shipping.deliveryDays} mein hoti hai. ₹${settings.shipping.freeAbove} se upar free delivery. Store pickup 2 ghante mein ready.`;
+
+  // Payment
   if (has('payment', 'upi', 'card', 'cod', 'cash'))
     return 'Payment: UPI, debit/credit card, net banking aur COD. Shop par cash bhi chalega.';
+
+  // Offers/Discounts
   if (has('offer', 'discount', 'coupon', 'code'))
     return `Chal raha offer: ${settings.offers?.title || 'festive sale'} — code ${settings.offers?.code || 'FESTIVE20'}. Spin wheel aur puzzle khel kar bhi coupon jeet sakte hain.`;
+
+  // Returns/Exchange
   if (has('return', 'exchange', 'refund'))
     return 'Exchange 7 din ke andar bill ke saath. Sale items final sale hain.';
+
+  // Order/Track
   if (has('order', 'track', 'status'))
     return 'Order track karne ke liye order ID daaliye "Track order" page par. WhatsApp par bhi update milta hai.';
+
+  // Contact
   if (has('contact', 'phone', 'whatsapp', 'call'))
     return `Call ya WhatsApp: ${shop.phone}. Email: ${shop.email}.`;
-  return `Main ${shop.name} ka assistant hoon. Aap poochh sakte hain: kurta/sherwani collection, price, size, alteration, delivery, offers ya shop ka address.`;
+
+  // Default human-like response with suggestions
+  return `Main ${shop.name} ka assistant hoon. Aap poochh sakte hain: kurta/sherwani collection, price, size, alteration, delivery, offers ya shop ka address. Kuch bhi poochh sakte hain!`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -422,6 +451,8 @@ const SPIN_SEGMENTS = [
   { label: 'Buy 2 Get 1 at 50%', type: 'offer', value: 50, applicableOn: 'all', weight: 8 },
   { label: '30% OFF Kurtas', type: 'percent', value: 30, applicableOn: 'kurtas', weight: 4 },
   { label: 'Spin Again', type: 'none', value: 0, applicableOn: 'all', weight: 10 },
+  { label: 'Lucky Draw', type: 'percent', value: 15, applicableOn: 'all', weight: 5 },
+  { label: 'Seasonal Surprise', type: 'percent', value: randomInt(5, 40), applicableOn: 'all', weight: 6 },
 ];
 
 const QUIZ = [
@@ -430,6 +461,8 @@ const QUIZ = [
   { id: 'q3', question: 'Which fit does our tailor recommend for a festive kurta?', options: ['Skin tight', 'Comfortable with room to move', 'Two sizes large', 'Crop length'], answer: 1 },
   { id: 'q4', question: 'What is the ideal length for a wedding sherwani?', options: ['Ankle-length', 'Knee-length', 'Mid-calf', 'Floor-length'], answer: 3 },
   { id: 'q5', question: 'Which color is most popular for festive kurtas?', options: ['Gold', 'Silver', 'Bronze', 'Copper'], answer: 0 },
+  { id: 'q6', question: 'What is the typical delivery time for pre-ordered sherwanis?', options: ['3-5 days', '1-2 weeks', '2-3 weeks', '1 month'], answer: 1 },
+  { id: 'q7', question: 'Which accessory completes a festive sherwani look?', options: ['Pagdi', 'Safari jacket', 'Nehru jacket', 'All of the above'], answer: 3 },
 ];
 
 const codePart = () => Math.random().toString(36).slice(2, 6).toUpperCase();
