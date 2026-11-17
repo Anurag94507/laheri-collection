@@ -20,6 +20,7 @@ const CHANNELS = [
 export default function AccountLogin() {
   const navigate = useNavigate();
   const location = useLocation();
+  const account = useCustomer((state) => state.account);
   const setAccount = useCustomer((state) => state.setAccount);
   const redirectTo = location.state?.from || '/account';
 
