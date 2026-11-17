@@ -71,6 +71,8 @@
   .card {
     @apply rounded-2xl bg-white shadow-soft;
     border: 1px solid rgba(15, 27, 60, 0.1);
+    perspective: 1000px;
+    transform-style: preserve-3d;
   }
 
   .input {
@@ -103,7 +105,15 @@
   }
 
   .card-lift {
-    @apply transition duration-500 hover:-translate-y-1 hover:shadow-lift;
+    @apply rounded-2xl;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease;
+    will-change: transform;
+  }
+
+  .card-lift:hover {
+    transform: translateY(-6px) rotateX(2.5deg) rotateY(-2.5deg) scale(1.012);
+    box-shadow: 0 26px 60px -20px rgba(15, 27, 60, 0.38), 0 10px 24px -14px rgba(201, 168, 76, 0.45);
   }
 
   .shimmer-text {

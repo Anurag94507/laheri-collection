@@ -413,6 +413,8 @@ function chatReply(message, settings) {
 /* game config                                                         */
 /* ------------------------------------------------------------------ */
 
+const randomInt = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+
 const SPIN_SEGMENTS = [
   { label: 'Special Discount', type: 'percent', value: 8, applicableOn: 'all', weight: 15 },
   { label: 'Festive Bonus', type: 'percent', value: 12, applicableOn: 'all', weight: 20 },
@@ -762,8 +764,9 @@ async function handleApi(request, env, url) {
       const password = String(env.ADMIN_PASSWORD || '');
       // No built-in default: an unconfigured deployment refuses admin logins instead of
       // falling back to a password everybody knows.
-      if (password.length < 8
+      if (password.length < 8) {
         return fail(503, 'Admin login is not configured for this shop yet.');
+      }
 
       // Throttle wrong passwords per IP *and* username, so a wrong username typed on the
       // shop wifi cannot lock the owner out. Unknown usernames share one bucket per IP
