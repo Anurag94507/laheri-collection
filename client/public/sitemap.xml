@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://site-ac9250f405614c4fb38fb9ad6a70c64a.freebuff.page/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://site-ac9250f405614c4fb38fb9ad6a70c64a.freebuff.page/collections</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://site-ac9250f405614c4fb38fb9ad6a70c64a.freebuff.page/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://site-ac9250f405614c4fb38fb9ad6a70c64a.freebuff.page/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://site-ac9250f405614c4fb38fb9ad6a70c64a.freebuff.page/offers</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://site-ac9250f405614c4fb38fb9ad6a70c64a.freebuff.page/track</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+</urlset>

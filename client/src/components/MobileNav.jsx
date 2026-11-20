@@ -23,6 +23,7 @@ export default function MobileNav() {
             key={item.to}
             to={item.to}
             end={item.end}
+            data-bag-drop={item.label === 'Bag' ? '' : undefined}
             className={({ isActive }) =>
               `relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium tracking-wide ${
                 isActive ? 'text-navy' : 'text-ink/45'

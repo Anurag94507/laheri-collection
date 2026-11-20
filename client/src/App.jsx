@@ -5,9 +5,12 @@ import { useAuth } from './store/auth.js';
 import { useCustomer } from './store/customer.js';
 import { useCart } from './store/cart.js';
 import SiteLayout from './components/SiteLayout.jsx';
+import LogoLoader from './components/LogoLoader.jsx';
 import Toaster from './components/Toaster.jsx';
 import Home from './pages/Home.jsx';
 import Collections from './pages/Collections.jsx';
+import About from './pages/About.jsx';
+import Contact from './pages/Contact.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
 import Cart from './pages/Cart.jsx';
 import Checkout from './pages/Checkout.jsx';
@@ -102,12 +105,15 @@ export default function App() {
   }, []);
 
   return (
-    <SettingsProvider>
-      <ScrollToTop />
+          <SettingsProvider>
+        <LogoLoader />
+        <ScrollToTop />
       <Routes>
         <Route element={<SiteLayout />}>
           <Route index element={<Home />} />
           <Route path="/collections" element={<Collections />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/collections/:id" element={<ProductDetail />} />
           <Route path="/login" element={<AccountLogin />} />
           <Route

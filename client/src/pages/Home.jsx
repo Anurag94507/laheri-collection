@@ -1,52 +1,140 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { whatsappHref } from '../components/SendCodeLinks.jsx';
-import { motion } from 'framer-motion';
-import { getCategories, getProducts } from '../api/index.js';
+import { motion, useReducedMotion } from 'framer-motion';
+import { getProducts } from '../api/index.js';
 import { useSettings } from '../context/SettingsContext.jsx';
-import { useChat } from '../store/chat.js';
+import usePageMeta from '../hooks/usePageMeta.js';
+import ClothingRack from '../components/ClothingRack.jsx';
+import QuickView from '../components/QuickView.jsx';
 import ProductCard from '../components/ProductCard.jsx';
+import Reveal from '../components/Reveal.jsx';
 import SectionHead from '../components/SectionHead.jsx';
+import { toast } from '../store/toast.js';
+import { whatsappHref } from '../components/SendCodeLinks.jsx';
 import {
   IconArrowRight,
+  IconCheck,
+  IconClock,
   IconGift,
-  IconInstagram,
+  IconPercent,
+  IconPhone,
+  IconPin,
   IconPuzzle,
   IconSparkles,
   IconStar,
+  IconTag,
+  IconTruck,
   IconWhatsApp,
 } from '../components/Icons.jsx';
 
-const fadeUp = {
-  initial: { opacity: 0, y: 26 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-60px' },
-  transition: { duration: 0.6, ease: [0.2, 0.8, 0.2, 1] },
-};
+const EASE = [0.22, 1, 0.36, 1];
 
-const marqueeItems = [
-  'Free alterations in 3 days',
-  'Sherwani fittings by appointment',
-  'Wedding season collection',
-  'Cash · UPI · Cards',
-  'Delivery across Uttar Pradesh',
-  'Since 1998',
+const ASSURANCES = [
+  { icon: IconCheck, text: 'Free alterations in 3 days' },
+  { icon: IconTruck, text: 'Delivery across Uttar Pradesh' },
+  { icon: IconSparkles, text: 'A new rack every week' },
+  { icon: IconTag, text: 'Cash · UPI · Cards' },
+];
+
+const CATEGORY_TILES = [
+  {
+    label: 'Kurta & ethnic',
+    blurb: 'Everyday and pooja',
+    category: 'Kurta',
+    image: '/images/photos/cloth-2.jpg',
+    alt: 'Indigo chambray shirt hanging from a hanger',
+  },
+  {
+    label: 'Sherwani & suiting',
+    blurb: 'Wedding and sangeet',
+    category: 'Sherwani',
+    image: '/images/photos/cloth-1.jpg',
+    alt: 'Blue windowpane three-piece suit worn with a tie',
+  },
+  {
+    label: 'Formal shirts',
+    blurb: 'Office and boardroom',
+    category: 'Formal Shirt',
+    image: '/images/photos/cloth-5.jpg',
+    alt: 'Three formal shirts laid out on a wooden table',
+  },
+  {
+    label: 'Casual & western',
+    blurb: 'Easy weekends',
+    category: 'Casual Wear',
+    image: '/images/photos/cloth-9.jpg',
+    alt: 'Rust bomber jacket held up on a hanger',
+  },
+  {
+    label: 'Festive',
+    blurb: 'Diwali, Eid, Holi',
+    category: 'Festive Special',
+    image: '/images/photos/cloth-4.jpg',
+    alt: 'Blue striped shirt worn with a patterned tie',
+  },
+];
+
+const SHOP_FLOOR = [
+  {
+    image: '/images/photos/cloth-9.jpg',
+    caption: 'The rust bomber, straight off the rail',
+    alt: 'Hand holding a rust bomber jacket on a hanger against a pale wall',
+    width: 900,
+    height: 1100,
+  },
+  {
+    image: '/images/shop/tee-studio.jpg',
+    caption: 'Cotton, in studio light',
+    alt: 'Black cotton tee hanging in striped window light',
+    width: 960,
+    height: 1280,
+  },
+  {
+    image: '/images/photos/cloth-2.jpg',
+    caption: 'Indigo chambray, hung and ready',
+    alt: 'Indigo chambray shirt hanging on a metal hook',
+    width: 900,
+    height: 1100,
+  },
+  {
+    image: '/images/photos/cloth-5.jpg',
+    caption: 'Three shirts, three fabrics, one fitting',
+    alt: 'Navy, ivory and burgundy formal shirts on a wooden table',
+    width: 900,
+    height: 1100,
+  },
+];
+
+const WHY_US = [
+  { title: 'Fabric first', text: 'Cotton, linen and wool blends felt by hand before they ever reach the rail.' },
+  { title: 'Fitted in the shop', text: 'Free alterations within three days, measured by the people who cut the cloth.' },
+  { title: 'Honest shelf prices', text: 'The price on the tag is the price you pay — no invented MRP, no fake discounts.' },
+  { title: 'One shop, every occasion', text: 'Ethnic, formal, casual and festive, for the wedding and the ordinary Tuesday.' },
 ];
 
 export default function Home() {
   const { settings } = useSettings();
-  const { openChat } = useChat();
-  const [categories, setCategories] = useState([]);
-  const [arrivals, setArrivals] = useState([]);
+  const reduce = useReducedMotion();
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  usePageMeta({
+    title: 'Laheri Collection | Ethnic & Fashion Wear — Dressed for Every Occasion',
+    description:
+      'Shop the latest ethnic, western, casual and festive wear at Laheri Collection. Affordable fashion for every occasion. Explore new arrivals now.',
+    path: '/',
+    image: '/images/photos/cloth-3.jpg',
+  });
 
   useEffect(() => {
     let alive = true;
-    Promise.all([getProducts({ newArrival: 'true', limit: 8, sort: 'newest' }), getCategories()])
-      .then(([productData, categoryData]) => {
+    getProducts({ limit: 60, sort: 'newest' })
+      .then((data) => {
         if (!alive) return;
-        setArrivals(productData.items || []);
-        setCategories(categoryData || []);
+        setProducts(data.items || []);
       })
       .catch(() => {})
       .finally(() => alive && setLoading(false));
@@ -57,373 +145,599 @@ export default function Home() {
 
   const shop = settings?.shop;
   const offers = settings?.offers;
+  const games = settings?.games || {};
   const testimonials = settings?.testimonials || [];
-  const posts =
-    settings?.social?.posts?.length > 0
-      ? settings.social.posts
-      : [
-          { image: '/images/social/post-1.svg', caption: 'Indigo cotton for the evening pooja.' },
-          { image: '/images/social/post-2.svg', caption: 'Maroon velvet, groom-ready.' },
-          { image: '/images/social/post-3.svg', caption: 'Festive threads, straight off the shelf.' },
-          { image: '/images/social/post-4.svg', caption: 'Charcoal checks for the boardroom.' },
-        ];
+
+  const newArrivals = useMemo(() => {
+    const fresh = products.filter((product) => product.isNewArrival);
+    return (fresh.length ? fresh : products).slice(0, 8);
+  }, [products]);
+
+  const featured = useMemo(() => {
+    const starred = products.filter((product) => product.isFeatured);
+    return (starred.length ? starred : products).slice(0, 4);
+  }, [products]);
+
+  const gameCards = [
+    games.spinEnabled !== false && {
+      to: '/spin-wheel',
+      icon: IconGift,
+      label: 'Spin the wheel',
+      text: 'A discount for the next time you walk in.',
+    },
+    games.puzzleEnabled !== false && {
+      to: '/puzzle',
+      icon: IconPuzzle,
+      label: 'Solve the puzzle',
+      text: 'A small reward for a sharp eye.',
+    },
+  ].filter(Boolean);
+
+  const subscribe = (event) => {
+    event.preventDefault();
+    const address = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+    const message = `Hello Laheri Collection! Please add ${address} to your offers list. I would like exclusive festive offers.`;
+    window.open(whatsappHref(shop?.whatsapp, message), '_blank', 'noreferrer');
+    setSubscribed(true);
+    setEmail('');
+    toast.success('Opening WhatsApp to confirm your subscription.');
+  };
+
+  const headline = ['A rack built', 'for every', 'occasion'];
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-navy">
-        <img src="/images/hero.svg" alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-navy/25" />
-        <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/10 to-navy/40" />
-
-        <div className="container-x relative flex min-h-[84vh] flex-col justify-center py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
-            className="max-w-2xl"
-          >
-            <div className="flex items-center gap-3">
-              <span className="h-px w-10 bg-gold" />
-              <p className="eyebrow">Lucknow · Since {shop?.established || 1998}</p>
-            </div>
-
-            <h1 className="mt-6 font-display text-[52px] leading-[0.92] text-surface sm:text-[72px] lg:text-[84px]">
-              <span className="shimmer-text">{shop?.name || 'Laheri Collection'}</span>
-              <span className="mt-3 block font-display text-[24px] font-light italic leading-tight text-parchment/85 sm:text-[30px]">
-                {shop?.tagline || 'Dressed for every occasion — walk in or order online'}
-              </span>
-            </h1>
-
-            <p className="mt-6 max-w-lg text-sm leading-relaxed text-parchment/60 sm:text-base">
-              Sherwanis for the wedding, kurtas for the festival, shirts for Monday morning. Three decades of
-              fabric knowledge, honest prices, and free alterations from our in-house tailor.
+      {/* ---------------------------------------------------------------- */}
+      {/* Editorial split hero                                             */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="border-b border-ink/10">
+        <div className="container-x grid items-center gap-9 py-9 sm:py-12 lg:grid-cols-[1.04fr_0.96fr] lg:gap-14 lg:py-16 xl:py-20">
+          <div>
+            <p className="eyebrow-line">
+              Laheri Collection · {shop?.city || 'Sultanpur'}
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Link to="/collections" className="btn-gold">
-                Browse collection <IconArrowRight size={15} />
-              </Link>
-              <Link to="/offers" className="btn-ghost-light">
-                Today’s offers
-              </Link>
-            </div>
-
-            <div className="mt-12 grid max-w-lg grid-cols-3 gap-4 border-t border-parchment/15 pt-6">
-              {[
-                ['28 yrs', 'Serving Lucknow'],
-                ['1,400+', 'Happy customers'],
-                ['4.8 ★', 'Average rating'],
-              ].map(([value, label]) => (
-                <div key={label}>
-                  <p className="font-display text-2xl text-gold">{value}</p>
-                  <p className="mt-0.5 text-[10px] uppercase tracking-[0.16em] text-parchment/45">{label}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {offers?.active && (
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.25 }}
-              className="absolute bottom-10 right-8 hidden w-72 rounded-2xl border border-gold/30 bg-navy/55 p-5 backdrop-blur-md lg:block"
-            >
-              <p className="text-[10px] uppercase tracking-[0.24em] text-gold">Running now</p>
-              <p className="mt-2 font-display text-2xl text-surface">{offers.title}</p>
-              <p className="mt-1.5 text-xs leading-relaxed text-parchment/60">{offers.subtitle}</p>
-              <div className="mt-4 flex items-center justify-between border-t border-parchment/15 pt-3">
-                <span className="rounded-full border border-dashed border-gold/70 px-3 py-1 font-mono text-[11px] tracking-widest text-gold">
-                  {offers.code}
+            <h1 className="mt-5 font-display text-[40px] leading-[0.99] tracking-[-0.01em] text-ink sm:text-[54px] lg:text-[62px] xl:text-[68px]">
+              {headline.map((line, index) => (
+                <span key={line} className="block overflow-hidden pb-[0.06em]">
+                  <motion.span
+                    className="block"
+                    initial={reduce ? false : { y: '108%' }}
+                    animate={{ y: '0%' }}
+                    transition={{ duration: 0.62, delay: 0.06 + index * 0.07, ease: EASE }}
+                  >
+                    {index === 2 ? <em className="font-normal italic">{line}</em> : line}
+                  </motion.span>
                 </span>
-                <Link to="/offers" className="text-[11px] font-medium text-parchment/70 underline decoration-gold/50 underline-offset-4 hover:text-gold">
-                  Details
-                </Link>
-              </div>
-            </motion.div>
-          )}
+              ))}
+            </h1>
+
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-ink/60 sm:text-[15px]">
+              Menswear cut for the wedding, the office, the pooja and the ordinary Tuesday. Try it on at
+              Dariyapur Chauraha, or have it delivered across Uttar Pradesh.
+            </p>
+
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <a href="#new-arrivals" className="btn-navy">
+                Walk the rail <IconArrowRight size={15} />
+              </a>
+              <Link to="/collections" className="btn-outline">
+                View all collections
+              </Link>
+            </div>
+
+            <ul className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] uppercase tracking-[0.18em] text-ink/45">
+              <li className="flex items-center gap-2">
+                <IconCheck size={13} className="text-gold-dark" /> Free alterations
+              </li>
+              <li className="flex items-center gap-2">
+                <IconClock size={13} className="text-gold-dark" /> In-store fitting
+              </li>
+              <li className="flex items-center gap-2">
+                <IconTruck size={13} className="text-gold-dark" /> 2–4 day delivery
+              </li>
+            </ul>
+          </div>
+
+          <motion.figure
+            initial={reduce ? false : { clipPath: 'inset(0 0 0 100%)' }}
+            animate={{ clipPath: 'inset(0 0 0 0%)' }}
+            transition={{ duration: 0.95, delay: 0.16, ease: EASE }}
+            className="relative"
+          >
+            <div className="relative overflow-hidden bg-[#e9e2d6]">
+              <img
+                src="/images/photos/cloth-3.jpg"
+                alt="Man in a navy tailored two-piece suit and white shirt, photographed on location"
+                width="900"
+                height="1100"
+                fetchPriority="high"
+                decoding="async"
+                className="h-[380px] w-full object-cover object-[50%_16%] sm:h-[500px] lg:h-[560px] xl:h-[600px] lg:object-[50%_20%]"
+              />
+              <span
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent"
+                aria-hidden="true"
+              />
+              <span className="absolute bottom-4 left-4 bg-cream/95 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink">
+Campaign 01 — Occasion dressing
+              </span>
+            </div>
+            <figcaption className="mt-3 flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-ink/40">
+              <span>The navy suit, styled for a wedding</span>
+              <span className="text-gold-dark">Sultanpur</span>
+            </figcaption>
+          </motion.figure>
         </div>
       </section>
 
-      {/* Marquee strip */}
-      <div className="overflow-hidden border-y border-gold/30 bg-gold py-2.5 text-navy">
-        <div className="flex w-max animate-marquee items-center gap-8 whitespace-nowrap">
-          {[...marqueeItems, ...marqueeItems].map((item, index) => (
-            <span key={`${item}-${index}`} className="flex items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.18em]">
-              {item}
-              <span className="h-1 w-1 rounded-full bg-navy/40" />
-            </span>
+      {/* Assurance strip */}
+      <div className="border-b border-ink/10 bg-paper">
+        <ul className="container-x grid grid-cols-2 gap-x-6 gap-y-3 py-4 text-[10px] uppercase tracking-[0.18em] text-ink/55 sm:grid-cols-4">
+          {ASSURANCES.map((item) => (
+            <li key={item.text} className="flex items-center gap-2">
+              <item.icon size={14} className="flex-none text-gold-dark" />
+              <span>{item.text}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
-      {/* Categories */}
-      <section className="container-x py-16 sm:py-20">
-        <SectionHead
-          eyebrow="Shop by collection"
-          title="Find your occasion"
-          description="From a Monday morning in the office to the last dance at a sangeet — every collection is hand-picked and stocked in store."
-          action={
-            <Link to="/collections" className="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-navy/60 transition hover:text-gold-dark sm:flex">
-              View all <IconArrowRight size={14} />
-            </Link>
-          }
-        />
-        <div className="flex snap-x gap-4 overflow-x-auto pb-3 hide-scrollbar">
-          {loading
-            ? Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="h-[340px] w-[220px] flex-none animate-pulse rounded-2xl bg-navy/5" />
-              ))
-            : categories.map((category) => (
+      {/* ---------------------------------------------------------------- */}
+      {/* The rail                                                         */}
+      {/* ---------------------------------------------------------------- */}
+      <section id="new-arrivals" className="scroll-mt-24 py-14 sm:py-20">
+        <div className="container-x">
+          <SectionHead
+            eyebrow="Just arrived"
+            title="This week on the rail"
+            description="Slide along the rack the way you would in the shop. The piece in the middle steps forward; tap any garment for fabric, sizes and a quick add."
+            action={
+              <Link
+                to="/collections?sort=newest"
+                className="hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/55 transition hover:text-ink sm:flex"
+              >
+                All new arrivals <IconArrowRight size={13} />
+              </Link>
+            }
+          />
+        </div>
+
+        {loading ? (
+          <div className="container-x flex gap-4 overflow-hidden pb-10">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="aspect-[3/4] w-[240px] flex-none animate-pulse bg-ink/5" />
+            ))}
+          </div>
+        ) : (
+          <ClothingRack products={newArrivals} onSelect={setSelected} ariaLabel="New arrivals rail" />
+        )}
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Categories                                                       */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="border-y border-ink/10 bg-paper py-14 sm:py-20">
+        <div className="container-x">
+          <SectionHead
+            eyebrow="Shop by occasion"
+            title="Five rails, one shop"
+            description="Start with the occasion — the floor is already sorted for it. Dhoti and traditional drape sit inside the full collection."
+          />
+          <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-3">
+            {CATEGORY_TILES.map((tile, index) => (
+              <Reveal key={tile.label} delay={index * 0.05}>
                 <Link
-                  key={category.name}
-                  to={`/collections?category=${encodeURIComponent(category.name)}`}
-                  className="group relative h-[340px] w-[230px] flex-none snap-start overflow-hidden rounded-2xl bg-navy"
+                  to={`/collections?category=${encodeURIComponent(tile.category)}`}
+                  className="group block h-full"
                 >
-                  <img
-                    src={category.image || '/images/products/kurta-royal.svg'}
-                    alt={category.name}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/25 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-5 text-surface">
-                    <p className="font-display text-2xl leading-tight">{category.name}</p>
-                    <p className="mt-0.5 text-[11px] text-parchment/55">
-                      {category.blurb} · {category.count} {category.count === 1 ? 'piece' : 'pieces'}
-                    </p>
-                    <span className="mt-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-gold/50 text-gold transition group-hover:bg-gold group-hover:text-navy">
-                      <IconArrowRight size={14} />
+                  <div className="overflow-hidden bg-[#e9e2d6]">
+                    <img
+                      src={tile.image}
+                      alt={`${tile.alt} — ${tile.label} at Laheri Collection`}
+                      width="900"
+                      height="1100"
+                      loading="lazy"
+                      decoding="async"
+                      className="aspect-[3/4] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
+                    />
+                  </div>
+                  <div className="mt-3 flex items-start justify-between gap-3 border-t border-ink/15 pt-3">
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-ink/35">
+                        0{index + 1}
+                      </p>
+                      <h3 className="mt-1 font-display text-[19px] leading-tight text-ink sm:text-[22px]">
+                        {tile.label}
+                      </h3>
+                      <p className="mt-0.5 text-[11px] text-ink/50">{tile.blurb}</p>
+                    </div>
+                    <span className="mt-1 flex h-8 w-8 flex-none items-center justify-center border border-ink/15 text-ink/50 transition group-hover:border-ink group-hover:bg-ink group-hover:text-cream">
+                      <IconArrowRight size={13} />
                     </span>
                   </div>
                 </Link>
-              ))}
+              </Reveal>
+            ))}
+
+            <Reveal delay={0.25} className="col-span-2 lg:col-span-1">
+              <Link
+                to="/collections"
+                className="group flex h-full min-h-[220px] flex-col justify-between bg-navy p-6 text-cream sm:p-8"
+              >
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-gold-light">
+                    The whole floor
+                  </p>
+                  <h3 className="mt-3 font-display text-[26px] leading-[1.05] text-cream sm:text-[30px]">
+                    Every piece,
+                    <br />
+                    one collection
+                  </h3>
+                </div>
+                <ul className="my-6 space-y-1.5 border-y border-cream/10 py-5 text-[11px] uppercase tracking-[0.16em] text-cream/45">
+                  {['Kurta & ethnic', 'Sherwani & suiting', 'Formal shirts', 'Casual & western', 'Festive', 'Dhoti & traditional'].map((line) => (
+                    <li key={line} className="flex items-center gap-2">
+                      <span className="h-1 w-1 rounded-full bg-gold/70" aria-hidden="true" />
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+                <span className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-cream transition group-hover:text-gold-light">
+                  Walk the rail <IconArrowRight size={13} />
+                </span>
+              </Link>
+            </Reveal>
+          </div>
         </div>
       </section>
 
-      {/* New arrivals */}
-      <section className="container-x pb-16 sm:pb-20">
+      {/* ---------------------------------------------------------------- */}
+      {/* Featured edit                                                    */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="container-x py-14 sm:py-20">
         <SectionHead
-          eyebrow="Fresh off the shelf"
-          title="New arrivals"
-          description="The latest pieces to reach the shop floor, updated every week."
+          eyebrow="The featured edit"
+          title="Pieces we keep coming back to"
+          description="Four hero pieces from the shop floor — fabric, fit and finish chosen for the season."
           action={
-            <Link to="/collections?sort=newest" className="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-navy/60 transition hover:text-gold-dark sm:flex">
-              Shop new <IconArrowRight size={14} />
+            <Link
+              to="/collections"
+              className="hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/55 transition hover:text-ink sm:flex"
+            >
+              Shop all <IconArrowRight size={13} />
             </Link>
           }
         />
-        <div className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4">
-          {loading
-            ? Array.from({ length: 8 }).map((_, index) => (
-                <div key={index}>
-                  <div className="aspect-[4/5] animate-pulse rounded-2xl bg-navy/5" />
-                  <div className="mt-4 h-4 w-2/3 animate-pulse rounded bg-navy/5" />
-                  <div className="mt-2 h-3 w-1/3 animate-pulse rounded bg-navy/5" />
-                </div>
-              ))
-            : arrivals.map((product, index) => <ProductCard key={product._id} product={product} index={index} />)}
-        </div>
-        <div className="mt-8 text-center sm:hidden">
-          <Link to="/collections" className="btn-outline btn-sm">View all products</Link>
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="aspect-[3/4] animate-pulse bg-ink/5" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
+            {featured.map((product, index) => (
+              <ProductCard
+                key={product._id}
+                product={product}
+                index={index}
+                onQuickView={setSelected}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Festive offer banner */}
-      {offers && (
-        <section className="container-x pb-16 sm:pb-20">
-          <motion.div
-            {...fadeUp}
-            className="relative overflow-hidden rounded-3xl bg-navy px-6 py-12 text-surface sm:px-12 sm:py-16"
-          >
-            <div
-              className="absolute inset-0 opacity-25"
-              style={{ backgroundImage: 'url(/images/puzzle.svg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-maroon-900/20" style={{ backgroundImage: 'linear-gradient(90deg, #0F1B3C 20%, rgba(15,27,60,0.9) 55%, rgba(90,29,38,0.55))' }} />
-            <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-              <div className="max-w-xl">
-                <p className="eyebrow">{offers.festival || 'Festive season'}</p>
-                <h2 className="mt-3 text-[36px] leading-[1.02] text-surface sm:text-[46px]">{offers.title}</h2>
-                <p className="mt-3 text-sm leading-relaxed text-parchment/65">{offers.subtitle}</p>
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <Link to={`/collections?category=${encodeURIComponent('Festive Special')}`} className="btn-gold">
-                    Shop the edit
-                  </Link>
-                  <span className="rounded-full border border-dashed border-gold/60 px-4 py-2 font-mono text-xs tracking-[0.2em] text-gold">
-                    CODE: {offers.code}
-                  </span>
-                </div>
-              </div>
-              <div className="relative flex h-32 w-32 flex-none items-center justify-center rounded-full border border-gold/40 sm:h-40 sm:w-40">
-                <div className="absolute inset-2 rounded-full border border-dashed border-gold/30" />
-                <div className="text-center">
-                  <p className="font-display text-4xl text-gold">20%</p>
-                  <p className="mt-1 text-[9px] uppercase tracking-[0.22em] text-parchment/60">flat off</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </section>
-      )}
-
-      {/* Games */}
-      <section className="container-x pb-16 sm:pb-20">
-        <SectionHead
-          eyebrow="Play & win"
-          title="Win up to 30% off"
-          description="Two quick games, one-time coupon codes. Play on your phone while you browse — no purchase needed to play."
-          align="center"
-        />
-        <div className="grid gap-5 md:grid-cols-2">
-          <Link
-            to="/spin-wheel"
-            className="group relative flex min-h-[260px] flex-col justify-between overflow-hidden rounded-3xl bg-navy p-7 text-surface sm:p-9"
-          >
-            <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full border-[18px] border-gold/20 transition duration-700 group-hover:rotate-45" />
-            <div className="relative">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold text-navy">
-                <IconGift size={21} />
-              </span>
-              <p className="mt-5 text-[10px] uppercase tracking-[0.24em] text-gold">Game 01</p>
-              <h3 className="mt-1 font-display text-[30px] leading-tight text-surface">Spin the Wheel</h3>
-              <p className="mt-2 max-w-xs text-sm text-parchment/60">
-                Eight segments, one spin a week. Land on up to 30% off kurtas or a free alteration.
-              </p>
-            </div>
-            <span className="relative mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-              Play now <IconArrowRight size={14} className="transition group-hover:translate-x-1" />
-            </span>
-          </Link>
-
-          <Link
-            to="/puzzle"
-            className="group relative flex min-h-[260px] flex-col justify-between overflow-hidden rounded-3xl border border-navy/10 bg-surface p-7 sm:p-9"
-          >
-            <div className="absolute -bottom-10 -right-10 grid h-52 w-52 grid-cols-3 gap-1.5 opacity-25 transition duration-700 group-hover:scale-105">
-              {Array.from({ length: 9 }).map((_, index) => (
-                <span key={index} className="rounded bg-navy" style={{ opacity: 0.35 + index * 0.05 }} />
-              ))}
-            </div>
-            <div className="relative">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-navy text-gold">
-                <IconPuzzle size={21} />
-              </span>
-              <p className="mt-5 text-[10px] uppercase tracking-[0.24em] text-gold-dark">Game 02</p>
-              <h3 className="mt-1 font-display text-[30px] leading-tight text-navy">Fabric Puzzle</h3>
-              <p className="mt-2 max-w-xs text-sm text-ink/55">
-                A nine-tile puzzle, two minutes on the clock. Solve it for a 12% off coupon.
-              </p>
-            </div>
-            <span className="relative mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-navy">
-              Accept the challenge <IconArrowRight size={14} className="transition group-hover:translate-x-1" />
-            </span>
-          </Link>
-        </div>
-      </section>
-
-      {/* Social */}
-      <section className="bg-white py-16 sm:py-20">
+      {/* ---------------------------------------------------------------- */}
+      {/* From the shop floor                                              */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="border-y border-ink/10 bg-paper py-14 sm:py-20">
         <div className="container-x">
           <SectionHead
-            eyebrow={settings?.social?.handle || '@laheri.collection'}
-            title="From our shop floor"
-            description="Daily drops, fabric close-ups and customer fittings on Instagram."
+            eyebrow="From the shop floor"
+            title="Fabric, fittings, real pieces"
+            description="Photographed on the rail at Dariyapur Chauraha — as they hang, not styled into something they are not."
             action={
-              <a
-                href={settings?.social?.instagram}
-                target="_blank"
-                rel="noreferrer"
-                className="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-navy/60 transition hover:text-gold-dark sm:flex"
+              <Link
+                to="/about"
+                className="hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/55 transition hover:text-ink sm:flex"
               >
-                <IconInstagram size={15} /> Follow us
-              </a>
+                Our story <IconArrowRight size={13} />
+              </Link>
             }
           />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {posts.slice(0, 4).map((post, index) => (
-              <a
-                key={`${post.image}-${index}`}
-                href={post.url || settings?.social?.instagram}
-                target="_blank"
-                rel="noreferrer"
-                className="group relative aspect-square overflow-hidden rounded-xl bg-navy"
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:items-start">
+            {SHOP_FLOOR.map((shot, index) => (
+              <Reveal
+                key={shot.caption}
+                delay={index * 0.06}
+                className={index % 2 === 1 ? 'lg:mt-12' : ''}
               >
-                <img src={post.image} alt={post.caption || 'Shop post'} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-navy/85 via-navy/10 to-transparent p-4 opacity-0 transition duration-300 group-hover:opacity-100">
-                  <IconInstagram size={18} className="text-gold" />
-                  <p className="mt-2 text-[11px] leading-snug text-surface/80">{post.caption}</p>
-                </div>
-              </a>
+                <figure>
+                  <img
+                    src={shot.image}
+                    alt={shot.alt}
+                    width={shot.width}
+                    height={shot.height}
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-[4/5] w-full object-cover"
+                  />
+                  <figcaption className="mt-2.5 text-[10px] uppercase tracking-[0.16em] text-ink/45">
+                    {shot.caption}
+                  </figcaption>
+                </figure>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Chatbot promo */}
-      <section className="container-x py-16 sm:py-20">
-        <div className="relative overflow-hidden rounded-3xl bg-navy p-8 text-surface sm:p-12">
-          <div className="absolute inset-y-0 right-0 w-1/2 opacity-30">
-            <img src="/images/social/post-2.svg" alt="" className="h-full w-full object-cover" />
+      {/* ---------------------------------------------------------------- */}
+      {/* Offer + Play & Win                                               */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="container-x py-14 sm:py-16">
+        <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+          {offers && (
+            <div className="relative flex flex-col justify-center gap-6 overflow-hidden bg-navy p-6 text-cream sm:p-9">
+              <div className="relative">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-light">
+                  {offers.festival || 'This season'}
+                </p>
+                <h2 className="mt-3 max-w-md font-display text-[28px] leading-[1.05] text-cream sm:text-[34px]">
+                  {offers.title}
+                </h2>
+                <p className="mt-2 max-w-md text-[13px] leading-relaxed text-cream/65">{offers.subtitle}</p>
+              </div>
+              <div className="relative flex flex-wrap items-center gap-3">
+                <Link to="/offers" className="btn bg-cream text-navy hover:bg-gold-light">
+                  See the offer
+                </Link>
+                <span className="border border-dashed border-cream/35 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-gold-light">
+                  {offers.code}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {gameCards.length > 0 && (
+            <div className="border border-ink/15 bg-paper p-6 sm:p-8">
+              <div className="flex items-baseline justify-between gap-4">
+                <div>
+                  <p className="eyebrow-line">Play &amp; win</p>
+                  <h2 className="mt-2 font-display text-[24px] leading-tight text-ink sm:text-[28px]">
+                    A little reward
+                  </h2>
+                </div>
+                <IconPercent size={18} className="flex-none text-gold-dark" />
+              </div>
+              <div className="mt-5 space-y-2.5">
+                {gameCards.map((game) => (
+                  <Link
+                    key={game.to}
+                    to={game.to}
+                    className="group flex items-center gap-3 border border-ink/15 px-4 py-3 transition hover:border-ink/35 hover:bg-surface"
+                  >
+                    <span className="flex h-9 w-9 flex-none items-center justify-center bg-surface text-ink/70 transition group-hover:bg-navy group-hover:text-cream">
+                      <game.icon size={16} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] font-semibold text-ink">{game.label}</span>
+                      <span className="block text-[11px] text-ink/50">{game.text}</span>
+                    </span>
+                    <IconArrowRight size={14} className="flex-none text-ink/35 transition group-hover:text-ink" />
+                  </Link>
+                ))}
+              </div>
+              <p className="mt-4 text-[10px] leading-relaxed text-ink/35">
+                Prizes are redeemed in store or applied at checkout. One play per visit.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Why us                                                           */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="border-y border-ink/10 bg-paper py-14 sm:py-20">
+        <div className="container-x">
+          <div className="max-w-xl">
+            <p className="eyebrow-line">The Laheri way</p>
+            <h2 className="mt-3 display-lg">Four things we do not compromise on</h2>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/95 to-navy/40" />
-          <div className="relative max-w-lg">
-            <p className="eyebrow">Ask Laheri</p>
-            <h2 className="mt-3 text-[32px] leading-tight text-surface sm:text-[40px]">Have a question? Our shop assistant is awake.</h2>
-            <p className="mt-3 text-sm leading-relaxed text-parchment/60">
-              Ask about fit, fabric, store timings, alterations or the right outfit for an occasion. Type or speak —
-              Laheri replies in seconds, 24/7.
+          <div className="mt-10 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+            {WHY_US.map((item, index) => (
+              <Reveal key={item.title} delay={index * 0.05} className="border-t border-ink/20 pt-4">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-gold-dark">
+                  0{index + 1}
+                </p>
+                <h3 className="mt-2 font-display text-[20px] leading-tight text-ink">{item.title}</h3>
+                <p className="mt-2 text-[12px] leading-relaxed text-ink/55">{item.text}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Testimonials                                                     */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="container-x py-14 sm:py-20">
+        <SectionHead
+          eyebrow="Word of mouth"
+          title="Loved by our customers"
+          description="Notes from people who walked in as strangers and came back as regulars."
+        />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {testimonials.slice(0, 3).map((testimonial, index) => (
+            <Reveal
+              key={testimonial.id || testimonial.name}
+              delay={index * 0.05}
+              className="flex h-full flex-col border-t border-ink/20 pt-5"
+            >
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, starIndex) => (
+                  <IconStar
+                    key={starIndex}
+                    size={11}
+                    filled
+                    className={starIndex < testimonial.rating ? 'text-gold' : 'text-ink/15'}
+                  />
+                ))}
+              </div>
+              <blockquote className="mt-3 flex-1 font-display text-[17px] italic leading-relaxed text-ink/75">
+                “{testimonial.text}”
+              </blockquote>
+              <figcaption className="mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/45">
+                <span className="text-ink/70">{testimonial.name}</span> · {testimonial.city}
+              </figcaption>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Ask Laheri + Visit                                               */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="container-x pb-14 sm:pb-20">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="bg-navy p-7 text-cream sm:p-10">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-light">
+              Ask Laheri
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" onClick={openChat} className="btn-gold">
-                <IconSparkles size={16} /> Open chat
-              </button>
-              <Link to="/chatbot" className="btn-ghost-light">Full screen</Link>
+            <h2 className="mt-3 max-w-sm font-display text-[28px] leading-[1.05] text-cream sm:text-[32px]">
+              Not sure how it will fit?
+            </h2>
+            <p className="mt-3 max-w-sm text-[13px] leading-relaxed text-cream/65">
+              Ask our shop assistant about fabric, sizing or alterations — in English or Hindi. Or message the
+              shop directly and we will answer from the counter.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2.5">
+              <Link to="/chatbot" className="btn bg-cream text-navy hover:bg-gold-light">
+                Ask the assistant <IconArrowRight size={14} />
+              </Link>
+              {shop?.whatsapp && (
+                <a
+                  href={whatsappHref(shop.whatsapp, 'Hello Laheri Collection! I have a question about sizing.')}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn border-cream/35 text-cream hover:border-cream hover:bg-cream hover:text-navy"
+                >
+                  <IconWhatsApp size={15} /> WhatsApp
+                </a>
+              )}
+            </div>
+          </div>
+
+          <div className="border border-ink/15 bg-paper p-7 sm:p-10">
+            <p className="eyebrow-line">Visit the shop</p>
+            <h2 className="mt-3 font-display text-[26px] leading-[1.1] text-ink sm:text-[30px]">
+              {shop?.city || 'Sultanpur'}, Uttar Pradesh
+            </h2>
+            {shop && (
+              <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink/60">
+                {shop.address}
+              </p>
+            )}
+            <dl className="mt-5 space-y-2.5 text-[12px] text-ink/60">
+              {(shop?.hours || []).map((slot) => (
+                <div key={slot.days} className="flex items-start gap-2.5">
+                  <IconClock size={14} className="mt-0.5 flex-none text-gold-dark" />
+                  <span>
+                    <span className="text-ink/75">{slot.days}</span> · {slot.time}
+                  </span>
+                </div>
+              ))}
+              {shop?.phone && (
+                <div className="flex items-start gap-2.5">
+                  <IconPhone size={13} className="mt-0.5 flex-none text-gold-dark" />
+                  <a href={`tel:${String(shop.phone).replace(/[^\d+]/g, '')}`} className="hover:text-ink">
+                    {shop.phone}
+                  </a>
+                </div>
+              )}
+              <div className="flex items-start gap-2.5">
+                <IconPin size={14} className="mt-0.5 flex-none text-gold-dark" />
+                <span>Near Dariyapur Chauraha, Sultanpur</span>
+              </div>
+            </dl>
+            <div className="mt-6 flex flex-wrap gap-2.5">
+              <Link to="/contact" className="btn-navy btn-sm">
+                Contact the shop
+              </Link>
+              {shop?.mapsLink && (
+                <a
+                  href={shop.mapsLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-outline btn-sm"
+                >
+                  Get directions
+                </a>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="container-x pb-20">
-        <SectionHead eyebrow="Word of mouth" title="People who walked in as strangers" align="center" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {testimonials.slice(0, 4).map((testimonial, index) => (
-            <motion.figure
-              key={testimonial.id || testimonial.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: index * 0.06 }}
-              className="flex h-full flex-col rounded-2xl border border-navy/10 bg-white p-6"
-            >
-              <div className="flex gap-0.5 text-gold">
-                {Array.from({ length: 5 }).map((_, starIndex) => (
-                  <IconStar key={starIndex} size={13} filled className={starIndex < testimonial.rating ? 'text-gold' : 'text-navy/15'} />
-                ))}
-              </div>
-              <blockquote className="mt-4 flex-1 text-[13px] leading-relaxed text-ink/70">“{testimonial.text}”</blockquote>
-              <figcaption className="mt-5 border-t border-navy/10 pt-4">
-                <p className="font-display text-lg leading-none text-navy">{testimonial.name}</p>
-                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-ink/40">{testimonial.city}</p>
-              </figcaption>
-            </motion.figure>
-          ))}
-        </div>
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-gold/50 bg-white/60 px-6 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
+      {/* ---------------------------------------------------------------- */}
+      {/* Newsletter                                                       */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="container-x pb-16">
+        <div className="grid items-center gap-7 border border-ink/15 bg-paper px-6 py-9 sm:px-10 md:grid-cols-2 md:gap-12">
           <div>
-            <p className="font-display text-xl text-navy">Visit us at {shop?.address}, {shop?.city}</p>
-            <p className="mt-1 text-xs text-ink/50">Walk in any day · {shop?.hours?.[0]?.time || '10 AM – 9 PM'}</p>
+            <p className="eyebrow-line">The list</p>
+            <h2 className="mt-3 font-display text-[28px] leading-[1.06] text-ink sm:text-[34px]">
+              Get exclusive offers — subscribe now
+            </h2>
+            <p className="mt-2.5 max-w-sm text-[13px] leading-relaxed text-ink/55">
+              Festive drops, new arrivals and alteration slots. No more than one message a week.
+            </p>
           </div>
-          <div className="flex gap-2">
-            <a href={whatsappHref(shop?.whatsapp, 'Hello! I would like to know more about your collection.')} target="_blank" rel="noreferrer" className="btn-navy btn-sm">
-              <IconWhatsApp size={15} /> WhatsApp us
-            </a>
-            <a href={shop?.mapsLink} target="_blank" rel="noreferrer" className="btn-outline btn-sm">Directions</a>
-          </div>
+          <form onSubmit={subscribe} className="w-full">
+            {subscribed ? (
+              <div className="flex items-start gap-3 border border-ink/15 bg-surface p-4">
+                <IconCheck size={18} className="mt-0.5 flex-none text-success" />
+                <p className="text-sm text-ink/70">
+                  Thank you — confirm the message in WhatsApp and we will add you to the offers list.
+                </p>
+              </div>
+            ) : (
+              <>
+                <label htmlFor="newsletter-email" className="label">
+                  Email address
+                </label>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    id="newsletter-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="you@example.com"
+                    className="input flex-1"
+                    autoComplete="email"
+                  />
+                  <button type="submit" className="btn-navy flex-none">
+                    Subscribe
+                  </button>
+                </div>
+                <p className="mt-2 text-[11px] text-ink/40">
+                  We confirm subscriptions on WhatsApp so your inbox stays clean.
+                </p>
+              </>
+            )}
+          </form>
         </div>
       </section>
+
+      <QuickView product={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

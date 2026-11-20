@@ -18,7 +18,10 @@ export default function ChatWidget() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open, closeChat]);
 
-  if (location.pathname.startsWith('/chatbot')) return null;
+  // The home page carries its own Ask Laheri panel, so the floating launcher
+  // stays off it rather than sitting over the product grid.
+  const quiet = ['/', '/contact'].includes(location.pathname);
+  if (location.pathname.startsWith('/chatbot') || quiet) return null;
 
   return (
     <>
@@ -29,7 +32,7 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.22 }}
-            className="fixed inset-x-3 bottom-24 top-20 z-[75] flex flex-col overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-lift md:inset-auto md:bottom-24 md:right-6 md:h-[600px] md:w-[400px]"
+            className="fixed inset-x-3 bottom-24 top-20 z-[75] flex flex-col overflow-hidden border border-ink/10 bg-white shadow-lift md:inset-auto md:bottom-24 md:right-6 md:h-[600px] md:w-[400px]"
           >
             <div className="flex items-center justify-between gap-2 border-b border-navy/10 bg-white px-4 py-2.5">
               <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-navy/55">
@@ -55,10 +58,10 @@ export default function ChatWidget() {
         <button
           type="button"
           onClick={openChat}
-          className="group fixed bottom-24 right-5 z-[60] flex h-14 items-center gap-2 rounded-full bg-navy px-4 text-surface shadow-lift transition hover:bg-navy-800 md:bottom-6 md:right-6"
+          className="group fixed bottom-24 right-6 z-[60] hidden h-12 items-center gap-2 bg-navy px-3 text-surface shadow-lift transition hover:bg-navy-800 md:flex md:h-12 md:px-4"
           aria-label="Ask our AI shop assistant"
         >
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gold text-navy">
+          <span className="relative flex h-7 w-7 items-center justify-center rounded-full bg-gold text-navy md:h-8 md:w-8">
             <IconChat size={17} />
             <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse-soft rounded-full border-2 border-navy bg-success" />
           </span>

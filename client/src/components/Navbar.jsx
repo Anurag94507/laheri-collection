@@ -1,29 +1,37 @@
-import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cartCount, useCart } from '../store/cart.js';
-import { useChat } from '../store/chat.js';
+import { useBagFx } from '../store/bagFx.js';
 import { useSettings } from '../context/SettingsContext.jsx';
-import { IconBag, IconChat, IconClose, IconLock, IconMenu, IconUser } from './Icons.jsx';
+import { IconArrowRight, IconBag, IconClose, IconLock, IconMenu, IconSearch, IconUser, IconWhatsApp } from './Icons.jsx';
+import { whatsappHref } from './SendCodeLinks.jsx';
 import InstallApp from './InstallApp.jsx';
 
 const links = [
   { to: '/', label: 'Home', end: true },
-  { to: '/collections', label: 'Collections' },
+  { to: '/collections', label: 'Shop' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
   { to: '/offers', label: 'Offers' },
-  { to: '/spin-wheel', label: 'Play & Win' },
-  { to: '/track', label: 'Track Order' },
-  { to: '/chatbot', label: 'Ask Laheri' },
 ];
+
+const drawerLinks = [...links, { to: '/track', label: 'Track order' }, { to: '/chatbot', label: 'Ask Laheri' }];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [popping, setPopping] = useState(false);
+  const searchRef = useRef(null);
   const { items } = useCart();
-  const { openChat, open: chatOpen } = useChat();
+  const pulse = useBagFx((state) => state.pulse);
   const { settings } = useSettings();
   const location = useLocation();
+  const navigate = useNavigate();
   const count = cartCount(items);
+  const shop = settings?.shop;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -33,52 +41,84 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (!pulse) return undefined;
+    setPopping(true);
+    const timer = window.setTimeout(() => setPopping(false), 680);
+    return () => window.clearTimeout(timer);
+  }, [pulse]);
+
+  useEffect(() => {
     setOpen(false);
-  }, [location.pathname]);
+    setSearchOpen(false);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!searchOpen) return undefined;
+    searchRef.current?.focus();
+    const onKey = (event) => {
+      if (event.key === 'Escape') setSearchOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [searchOpen]);
+
+  const submitSearch = (event) => {
+    event.preventDefault();
+    const term = query.trim();
+    setSearchOpen(false);
+    setQuery('');
+    navigate(term ? `/collections?q=${encodeURIComponent(term)}` : '/collections');
+  };
 
   return (
     <>
-      <div className="bg-navy text-parchment/80">
-        <div className="container-x flex h-9 items-center justify-between gap-4 overflow-hidden text-[10px] uppercase tracking-[0.18em] sm:text-[11px]">
-          <p className="truncate">Free delivery above ₹1,999 · Free alterations within 3 days</p>
-          <p className="hidden flex-none items-center gap-2 sm:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-            Open till 9 PM · {settings?.shop?.city || 'Lucknow'}
-          </p>
+      {/* Announcement bar */}
+      <div className="bg-navy text-cream">
+        <div className="container-x flex h-9 items-center justify-between gap-4 overflow-hidden text-[9px] uppercase tracking-[0.2em] sm:text-[10px]">
+          <Link to="/collections?category=Festive%20Special" className="group flex min-w-0 items-center gap-2">
+            <span className="text-gold-light">New</span>
+            <span className="truncate text-cream/85">Festive collection on the rail — shop now</span>
+            <IconArrowRight size={12} className="hidden flex-none text-gold-light transition group-hover:translate-x-1 sm:block" />
+          </Link>
+          <p className="hidden flex-none text-cream/50 lg:block">Free delivery above ₹1,999 · Alterations in 3 days</p>
         </div>
       </div>
 
       <header
         className={`sticky top-0 z-50 border-b transition-all duration-300 ${
-          scrolled ? 'border-navy/10 bg-surface/95 shadow-[0_10px_30px_-24px_rgba(15,27,60,0.6)] backdrop-blur' : 'border-transparent bg-surface'
+          scrolled
+            ? 'border-ink/15 bg-surface/95 shadow-[0_16px_34px_-32px_rgba(25,22,18,0.55)] backdrop-blur-md'
+            : 'border-ink/10 bg-surface'
         }`}
       >
-        <div className="container-x flex h-[72px] items-center justify-between gap-4">
-          <Link to="/" className="group flex items-center gap-3">
+        <div className="container-x flex h-[64px] items-center justify-between gap-3 sm:h-[74px]">
+          <Link to="/" className="group flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
             <img
               src="/logo.svg"
-              alt={`${settings?.shop?.name || 'Laheri Collection'} logo`}
-              className="h-11 w-11 rounded-full ring-1 ring-gold/40 transition group-hover:ring-gold"
+              alt={`${shop?.name || 'Laheri Collection'} logo`}
+              width="40"
+              height="40"
+              className="h-9 w-9 flex-none rounded-full ring-1 ring-ink/15 transition group-hover:ring-gold sm:h-10 sm:w-10"
             />
-            <span className="leading-none">
-              <span className="block font-display text-[22px] font-semibold tracking-wide text-navy">
-                {settings?.shop?.name || 'Laheri Collection'}
+            <span className="min-w-0 leading-none">
+              <span className="block truncate font-display text-[17px] tracking-[0.01em] text-ink sm:text-[23px]">
+                {shop?.name || 'Laheri Collection'}
               </span>
-              <span className="mt-1 block text-[9px] uppercase tracking-[0.32em] text-ink/45">
-                Est. {settings?.shop?.established || 1998} · {settings?.shop?.city || 'Lucknow'}
+              <span className="mt-1.5 hidden text-[8px] uppercase tracking-[0.3em] text-ink/40 sm:block">
+                Dressed for every occasion
               </span>
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-7 lg:flex">
+          <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary">
             {links.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `link-underline text-[13px] font-medium tracking-wide transition ${
-                    isActive ? 'text-navy after:w-full' : 'text-ink/60 hover:text-navy'
+                  `link-underline text-[10px] font-semibold uppercase tracking-[0.2em] transition ${
+                    isActive ? 'text-ink after:w-full' : 'text-ink/55 hover:text-ink'
                   }`
                 }
               >
@@ -87,39 +127,42 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex flex-none items-center gap-1 sm:gap-2">
             <button
               type="button"
-              onClick={openChat}
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-navy/10 text-navy/70 transition hover:border-gold hover:text-navy sm:flex"
-              aria-label="Open shop assistant"
+              onClick={() => setSearchOpen(true)}
+              className="flex h-9 w-9 items-center justify-center text-ink/65 transition hover:text-ink sm:h-10 sm:w-10"
+              aria-label="Search the collection"
             >
-              <IconChat size={18} />
+              <IconSearch size={18} />
             </button>
             <Link
               to="/account"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-navy/10 text-navy/70 transition hover:border-gold hover:text-navy"
+              className="hidden h-10 w-10 items-center justify-center text-ink/65 transition hover:text-ink sm:flex"
               aria-label="My account"
             >
               <IconUser size={17} />
             </Link>
             <Link
               to="/admin/login"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-navy/10 text-navy/70 transition hover:border-gold hover:text-navy sm:flex"
+              className="hidden h-10 w-10 items-center justify-center text-ink/55 transition hover:text-ink xl:flex"
               aria-label="Shopkeeper login"
             >
-              <IconLock size={17} />
+              <IconLock size={16} />
             </Link>
-            <InstallApp className="hidden h-10 w-10 rounded-full border border-navy/10 text-navy/70 hover:border-gold hover:text-navy sm:inline-flex" />
+            <InstallApp className="hidden h-10 w-10 text-ink/55 hover:text-ink xl:inline-flex" />
             <Link
               to="/cart"
-              className="relative flex h-10 items-center gap-2 rounded-full bg-navy px-3.5 text-surface transition hover:bg-navy-800 sm:px-4"
-              aria-label="Open cart"
+              data-bag-drop
+              className={`relative ml-1 hidden h-10 items-center gap-2 border border-ink/20 px-3.5 text-ink transition hover:border-ink hover:bg-ink hover:text-cream sm:flex ${
+                popping ? 'animate-bag-pop' : ''
+              }`}
+              aria-label={`Open bag, ${count} ${count === 1 ? 'item' : 'items'}`}
             >
-              <IconBag size={18} />
-              <span className="hidden text-xs font-medium tracking-wide sm:block">Bag</span>
+              <IconBag size={17} />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">Bag</span>
               {count > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-bold text-navy">
+                <span className="flex h-4 min-w-[16px] items-center justify-center bg-gold px-1 text-[9px] font-bold text-navy">
                   {count}
                 </span>
               )}
@@ -127,10 +170,11 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-navy/10 text-navy lg:hidden"
+              className="flex h-9 w-9 items-center justify-center text-ink lg:hidden"
               aria-label="Toggle menu"
+              aria-expanded={open}
             >
-              {open ? <IconClose size={20} /> : <IconMenu size={20} />}
+              {open ? <IconClose size={21} /> : <IconMenu size={21} />}
             </button>
           </div>
         </div>
@@ -142,37 +186,44 @@ export default function Navbar() {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="overflow-hidden border-t border-navy/10 bg-surface lg:hidden"
+              className="overflow-hidden border-t border-ink/10 bg-surface lg:hidden"
             >
-              <div className="container-x flex flex-col py-3">
-                {links.map((link) => (
+              <div className="container-x flex flex-col py-2">
+                {drawerLinks.map((link) => (
                   <NavLink
                     key={link.to}
                     to={link.to}
                     end={link.end}
                     className={({ isActive }) =>
-                      `border-b border-navy/5 py-3 text-sm font-medium ${isActive ? 'text-gold-dark' : 'text-ink/70'}`
+                      `border-b border-ink/5 py-3 text-[12px] font-semibold uppercase tracking-[0.14em] ${
+                        isActive ? 'text-gold-dark' : 'text-ink/65'
+                      }`
                     }
                   >
                     {link.label}
                   </NavLink>
                 ))}
-                <div className="flex gap-3 py-4">
-                  <Link to="/cart" className="btn-navy btn-sm flex-1">
-                    View bag
+                <div className="flex gap-2 py-4">
+                  <Link to="/collections" className="btn-navy btn-sm flex-1">
+                    Walk the rail
                   </Link>
-                  <button type="button" onClick={openChat} className="btn-outline btn-sm flex-1">
-                    Ask Laheri
-                  </button>
+                  {shop?.whatsapp && (
+                    <a
+                      href={whatsappHref(shop.whatsapp, 'Hello Laheri Collection! I have a question.')}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-outline btn-sm flex-1"
+                    >
+                      <IconWhatsApp size={14} /> WhatsApp
+                    </a>
+                  )}
                 </div>
-                <InstallApp label className="w-full justify-start border-b border-navy/5 py-3 text-sm font-medium text-gold-dark" />
-                <div className="flex items-center justify-between border-t border-navy/5 py-4 text-xs text-ink/50">
-                  <Link to="/account" className="font-medium text-navy">
-                    My account · bag & orders
+                <InstallApp label className="w-full justify-start border-b border-ink/5 py-3 text-sm font-medium text-gold-dark" />
+                <div className="flex items-center justify-between py-3.5 text-xs text-ink/45">
+                  <Link to="/account" className="font-medium text-ink">
+                    My account
                   </Link>
-                  <Link to="/admin/login">
-                    Shopkeeper login →
-                  </Link>
+                  <Link to="/admin/login">Shopkeeper login →</Link>
                 </div>
               </div>
             </motion.div>
@@ -180,7 +231,64 @@ export default function Navbar() {
         </AnimatePresence>
       </header>
 
-      {chatOpen && <span className="sr-only">Assistant open</span>}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] bg-ink/45 backdrop-blur-sm"
+            onClick={() => setSearchOpen(false)}
+          >
+            <motion.form
+              onSubmit={submitSearch}
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -16, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={(event) => event.stopPropagation()}
+              className="mx-auto mt-20 w-[min(92vw,660px)] border border-ink/10 bg-paper p-6 shadow-lift sm:mt-24 sm:p-8"
+              role="search"
+            >
+              <div className="flex items-center justify-between">
+                <p className="eyebrow">Search Laheri Collection</p>
+                <button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search" className="text-ink/50 hover:text-ink">
+                  <IconClose size={18} />
+                </button>
+              </div>
+              <label className="mt-5 flex items-center gap-3 border-b border-ink/25 pb-3">
+                <IconSearch size={20} className="text-gold-dark" />
+                <input
+                  ref={searchRef}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Kurta, sherwani, formal shirt…"
+                  aria-label="Search products"
+                  className="min-w-0 flex-1 bg-transparent font-display text-xl text-ink outline-none placeholder:text-ink/30"
+                />
+              </label>
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                {['Kurta', 'Sherwani', 'Formal Shirt', 'Festive Special'].map((term) => (
+                  <button
+                    key={term}
+                    type="button"
+                    onClick={() => {
+                      setSearchOpen(false);
+                      navigate(`/collections?category=${encodeURIComponent(term)}`);
+                    }}
+                    className="chip"
+                  >
+                    {term}
+                  </button>
+                ))}
+                <button type="submit" className="btn-navy btn-sm ml-auto">
+                  Search
+                </button>
+              </div>
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
