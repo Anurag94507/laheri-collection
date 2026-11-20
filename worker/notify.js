@@ -91,6 +91,7 @@ async function sendTwilio(env, mobile, from, code, whatsapp) {
 }
 
 async function sendResend(env, email, code) {
+  const plain = `Your Laheri Collection sign-in code is ${code}. It expires in 5 minutes. If you did not ask for it, ignore this email.`;
   const result = await post('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -101,10 +102,17 @@ async function sendResend(env, email, code) {
       from: value(env, 'MAIL_FROM'),
       to: [email],
       subject: 'Your Laheri Collection sign-in code',
+      // Both parts: mail providers treat html-only sign-in mail as more suspicious.
+      text: plain,
       html: `<p>Your Laheri Collection sign-in code is <strong style="font-size:20px;letter-spacing:3px">${code}</strong>.</p><p>It expires in 5 minutes. If you did not ask for it, ignore this email.</p>`,
     }),
   });
-  if (!result.ok) throw new Error(`Email provider refused the message (${result.status})`);
+  if (!result.ok) {
+    // Resend explains a bad sender or unverified domain in the body; keep it so the shop
+    // can see the reason in Dashboard → Login codes instead of guessing.
+    const detail = String(result.body?.message || result.body?.error || '').trim().slice(0, 160);
+    throw new Error(`Email provider refused the message (${result.status}${detail ? `: ${detail}` : ''})`);
+  }
   return 'resend-email';
 }
 

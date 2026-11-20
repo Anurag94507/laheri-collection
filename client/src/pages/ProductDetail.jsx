@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getProduct } from '../api/index.js';
 import { useSettings } from '../context/SettingsContext.jsx';
+import { telHref } from '../components/SendCodeLinks.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import Modal from '../components/Modal.jsx';
 import { useCart } from '../store/cart.js';
@@ -254,7 +255,7 @@ export default function ProductDetail() {
             <a href={waShare} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs font-medium text-ink/55 transition hover:text-[#25D366]">
               <IconWhatsApp size={15} /> Share on WhatsApp
             </a>
-            <a href={`tel:+91${shop?.phone || ''}`} className="text-xs font-medium text-ink/55 transition hover:text-navy">
+            <a href={telHref(shop?.phone)} className="text-xs font-medium text-ink/55 transition hover:text-navy">
               Call shop · +91 {shop?.phone}
             </a>
           </div>

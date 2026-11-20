@@ -46,6 +46,17 @@ const mail = { RESEND_API_KEY: 're_x', MAIL_FROM: 'shop@laheri.test' };
 result = await sendCode(mail, { channel: 'email', identifier: 'asha@example.com', code: '555666' });
 assert.equal(result.provider, 'resend-email');
 assert.deepEqual(JSON.parse(last().init.body).to, ['asha@example.com']);
+assert.match(JSON.parse(last().init.body).text, /555666/);
+
+// a refused email keeps the provider's reason so the admin panel can show it
+globalThis.__nextStatus = 403;
+globalThis.__nextBody = { message: 'The domain is not verified.' };
+await assert.rejects(
+  () => sendCode(mail, { channel: 'email', identifier: 'asha@example.com', code: '555666' }),
+  /Email provider refused the message \(403: The domain is not verified\.\)/
+);
+globalThis.__nextStatus = 200;
+globalThis.__nextBody = null;
 
 // email asked for but only SMS configured
 await assert.rejects(() => sendCode(msg91, { channel: 'email', identifier: 'a@b.com', code: '1' }), /No email sender/);

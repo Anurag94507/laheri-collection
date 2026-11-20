@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { telHref, whatsappHref } from './SendCodeLinks.jsx';
 import { useSettings } from '../context/SettingsContext.jsx';
 import {
   IconFacebook,
@@ -19,7 +20,7 @@ export default function Footer() {
     return <footer className="bg-navy py-16 text-center text-sm text-parchment/50">Loading shop details…</footer>;
   }
 
-  const waLink = `https://wa.me/91${shop.whatsapp}?text=${encodeURIComponent('Hello, I would like to know more about your collection.')}`;
+  const waLink = whatsappHref(shop.whatsapp, 'Hello, I would like to know more about your collection.');
 
   return (
     <footer className="texture-indigo mt-24 text-surface">
@@ -80,7 +81,7 @@ export default function Footer() {
             </li>
             <li className="flex gap-3">
               <IconPhone size={16} className="mt-0.5 flex-none text-gold" />
-              <a href={`tel:+91${shop.phone}`} className="transition hover:text-gold">+91 {shop.phone}</a>
+              <a href={telHref(shop.phone)} className="transition hover:text-gold">+91 {shop.phone}</a>
             </li>
             <li className="flex gap-3">
               <IconMail size={16} className="mt-0.5 flex-none text-gold" />

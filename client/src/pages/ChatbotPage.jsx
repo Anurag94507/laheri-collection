@@ -2,6 +2,7 @@ import PageHero from '../components/PageHero.jsx';
 import ChatPanel from '../components/ChatPanel.jsx';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { IconClock, IconMic, IconPhone, IconVolume } from '../components/Icons.jsx';
+import { telHref } from '../components/SendCodeLinks.jsx';
 
 export default function ChatbotPage() {
   const { settings } = useSettings();
@@ -52,7 +53,7 @@ export default function ChatbotPage() {
               Call or WhatsApp the shop during working hours — {shop?.hours?.[0]?.time || '10 AM to 9 PM'}.
             </p>
             <div className="mt-4 space-y-2 text-xs">
-              <a href={`tel:+91${shop?.phone}`} className="flex items-center gap-2 text-parchment/80 hover:text-gold">
+              <a href={telHref(shop?.phone)} className="flex items-center gap-2 text-parchment/80 hover:text-gold">
                 <IconPhone size={14} /> +91 {shop?.phone}
               </a>
               <p className="flex items-center gap-2 text-parchment/50">

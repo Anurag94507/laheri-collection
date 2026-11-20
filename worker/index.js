@@ -853,8 +853,30 @@ async function handleApi(request, env, url) {
       if (last && Date.now() - new Date(last.createdAt).getTime() < 30000)
         return fail(429, 'Please wait a few seconds before requesting another code.');
 
+      // Guard the other way too: a number cannot be flooded with endless codes.
+      const lastHour = otps.filter(
+        (entry) =>
+          entry.identifier === identifier &&
+          entry.purpose === purpose &&
+          Date.now() - new Date(entry.createdAt).getTime() < 60 * 60 * 1000
+      );
+      if (lastHour.length >= 6)
+        return fail(429, 'Too many codes requested for this number. Please try again after an hour.');
+
       const code = String(Math.floor(100000 + Math.random() * 900000));
-      await putDoc(env, 'otps', {
+      // Only one code may work at a time: every older, still-unused code for this number stops working.
+      for (const stale of otps) {
+        if (
+          stale.identifier === identifier &&
+          stale.purpose === purpose &&
+          !stale.usedAt &&
+          !stale.revokedAt &&
+          new Date(stale.expiresAt).getTime() > Date.now()
+        ) {
+          await putDoc(env, 'otps', { ...stale, revokedAt: nowIso() });
+        }
+      }
+      const otp = {
         _id: newId(),
         identifier,
         type: emailMode ? 'email' : 'mobile',
@@ -864,27 +886,32 @@ async function handleApi(request, env, url) {
         attempts: 0,
         expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
         createdAt: nowIso(),
-      });
+        delivery: { status: 'pending', attempts: 0 },
+      };
+      await putDoc(env, 'otps', otp);
 
-      // Send it for real when a provider is configured; otherwise the shop relays it.
+      // Send it for real when a provider is configured. A refused send is retried, and when
+      // it still fails the code stays in the shop's panel so staff can send it by hand.
       const delivery = deliveryStatus(env);
       let sent = false;
+      let deliveryError = '';
       if (delivery.configured) {
-        try {
-          await sendCode(env, { channel, identifier, code });
-          sent = true;
-        } catch (error) {
-          console.error('otp_delivery_failed', error?.message || error);
-          return json(
-            {
-              ok: false,
-              senderConfigured: true,
-              error: 'We could not send your code just now. Please try again, or call the shop on WhatsApp.',
-            },
-            502
-          );
+        for (let attempt = 1; attempt <= 3 && !sent; attempt += 1) {
+          try {
+            await sendCode(env, { channel, identifier, code });
+            sent = true;
+            otp.delivery = { status: 'sent', attempts: attempt, at: nowIso() };
+          } catch (error) {
+            deliveryError = error?.message || 'delivery failed';
+            console.error('otp_delivery_failed', attempt, deliveryError);
+            otp.delivery = { status: attempt === 3 ? 'failed' : 'retrying', attempts: attempt, error: deliveryError };
+            if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
+          }
         }
+      } else {
+        otp.delivery = { status: 'relay', attempts: 0 };
       }
+      await putDoc(env, 'otps', otp);
 
       return json({
         ok: true,
@@ -893,6 +920,7 @@ async function handleApi(request, env, url) {
         channel,
         purpose,
         delivered: sent,
+        deliveryFailed: Boolean(deliveryError) && !sent,
         senderConfigured: delivery.configured,
         expiresInSeconds: 300,
         // Codes are never returned by a deployed build. Only a local dev Worker with
@@ -900,7 +928,9 @@ async function handleApi(request, env, url) {
         devCode: env.OTP_DEBUG === 'true' ? code : undefined,
         message: sent
           ? `A 6-digit code was sent to ${identifier}.`
-          : 'Your code is ready. Message the shop on WhatsApp and we will share it.',
+          : deliveryError
+            ? 'We could not deliver the code automatically. Message the shop on WhatsApp and we will share it right away.'
+            : 'Your code is ready. Message the shop on WhatsApp and we will share it.',
       });
     }
 
@@ -914,7 +944,7 @@ async function handleApi(request, env, url) {
 
       const otps = await listDocs(env, 'otps');
       const otp = otps
-        .filter((entry) => entry.identifier === identifier && entry.purpose === 'login' && !entry.usedAt)
+        .filter((entry) => entry.identifier === identifier && entry.purpose === 'login' && !entry.usedAt && !entry.revokedAt)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .find((entry) => new Date(entry.expiresAt).getTime() > Date.now());
       if (!otp) return fail(400, 'This code has expired. Please request a new one.');
@@ -972,7 +1002,7 @@ async function handleApi(request, env, url) {
 
       const otps = await listDocs(env, 'otps');
       const otp = otps
-        .filter((entry) => entry.identifier === identifier && entry.purpose === 'reset' && !entry.usedAt)
+        .filter((entry) => entry.identifier === identifier && entry.purpose === 'reset' && !entry.usedAt && !entry.revokedAt)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .find((entry) => new Date(entry.expiresAt).getTime() > Date.now());
       if (!otp || String(code) !== String(otp.code)) return fail(400, 'That reset code is not valid.');
@@ -1707,15 +1737,17 @@ async function handleApi(request, env, url) {
       // the customer on WhatsApp. Only unexpired, unused codes are listed.
       // Once a sender is configured customers get their own codes, so staff no longer
       // need (or get) to see them.
-      if (deliveryStatus(env).configured)
-        return json({ codes: [], total: 0, senderConfigured: true });
+      const senderConfigured = deliveryStatus(env).configured;
       const codes = await listDocs(env, 'otps');
       const now = Date.now();
+      // Anything the customer has not actually received: no sender configured (relay) or a
+      // provider that refused the message. Codes delivered automatically stay private.
       const pending = codes
-        .filter((entry) => !entry.usedAt && new Date(entry.expiresAt).getTime() > now)
+        .filter((entry) => !entry.usedAt && !entry.revokedAt && new Date(entry.expiresAt).getTime() > now)
+        .filter((entry) => entry.delivery?.status !== 'sent')
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 20)
-        .map(({ _id, identifier, type, channel, purpose, code, createdAt, expiresAt }) => ({
+        .map(({ _id, identifier, type, channel, purpose, code, createdAt, expiresAt, delivery }) => ({
           _id,
           identifier,
           type,
@@ -1724,8 +1756,10 @@ async function handleApi(request, env, url) {
           code,
           createdAt,
           expiresAt,
+          delivery: delivery?.status || 'pending',
+          deliveryError: delivery?.error || '',
         }));
-      return json({ codes: pending, total: pending.length, senderConfigured: false });
+      return json({ codes: pending, total: pending.length, senderConfigured });
     }
     if (rest[0] === 'stats' && method === 'GET') {
       const [bills, orders, customers, products, campaigns, chatLogs] = await Promise.all([

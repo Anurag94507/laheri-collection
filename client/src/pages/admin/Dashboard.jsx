@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getDashboard, getLoginCodes } from '../../api/index.js';
+import SendCodeLinks from '../../components/SendCodeLinks.jsx';
 import { AcquisitionLine, CategoryDonut, RevenueBars } from '../../components/Charts.jsx';
 import { formatDateTime, formatINR } from '../../utils/format.js';
 import {
@@ -22,23 +23,27 @@ const STAT_TEMPLATES = [
 function LoginCodes() {
   const [codes, setCodes] = useState([]);
   const [state, setState] = useState('loading');
-  const [hidden, setHidden] = useState(false);
+  const [senderConfigured, setSenderConfigured] = useState(false);
 
   const load = () => {
-    setState('loading');
     getLoginCodes()
       .then((data) => {
         setCodes(data.codes || []);
-        setHidden(Boolean(data.senderConfigured));
+        setSenderConfigured(Boolean(data.senderConfigured));
         setState('ready');
       })
       .catch(() => setState('error'));
   };
 
-  useEffect(load, []);
+  // A new code must appear here the moment a customer asks for one, so poll while open.
+  useEffect(() => {
+    load();
+    const timer = setInterval(load, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
-  // Customers receive their own codes once a sender is set up, so this panel goes away.
-  if (hidden) return null;
+  // Nothing to relay once everything went out automatically.
+  if (senderConfigured && codes.length === 0) return null;
 
   return (
     <div className="admin-card">
@@ -68,9 +73,16 @@ function LoginCodes() {
                 <p className="text-xs font-medium text-navy/80">{entry.identifier}</p>
                 <p className="text-[10px] uppercase tracking-[0.12em] text-ink/35">
                   {entry.purpose === 'reset' ? 'Password reset' : 'Sign in'} · {entry.channel} · {formatDateTime(entry.createdAt)}
+                  {entry.delivery === 'failed' ? ' · delivery failed, send by hand' : ''}
                 </p>
+                {entry.deliveryError && (
+                  <p className="mt-0.5 max-w-xs break-words text-[10px] text-error/80">{entry.deliveryError}</p>
+                )}
               </div>
-              <span className="font-mono text-base font-bold tracking-[0.2em] text-gold-dark">{entry.code}</span>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <span className="font-mono text-base font-bold tracking-[0.2em] text-gold-dark">{entry.code}</span>
+                <SendCodeLinks mobile={entry.identifier} code={entry.code} purpose={entry.purpose} />
+              </div>
             </li>
           ))}
         </ul>

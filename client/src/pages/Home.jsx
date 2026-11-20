@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { whatsappHref } from '../components/SendCodeLinks.jsx';
 import { motion } from 'framer-motion';
 import { getCategories, getProducts } from '../api/index.js';
 import { useSettings } from '../context/SettingsContext.jsx';
@@ -416,7 +417,7 @@ export default function Home() {
             <p className="mt-1 text-xs text-ink/50">Walk in any day · {shop?.hours?.[0]?.time || '10 AM – 9 PM'}</p>
           </div>
           <div className="flex gap-2">
-            <a href={`https://wa.me/91${shop?.whatsapp || ''}`} target="_blank" rel="noreferrer" className="btn-navy btn-sm">
+            <a href={whatsappHref(shop?.whatsapp, 'Hello! I would like to know more about your collection.')} target="_blank" rel="noreferrer" className="btn-navy btn-sm">
               <IconWhatsApp size={15} /> WhatsApp us
             </a>
             <a href={shop?.mapsLink} target="_blank" rel="noreferrer" className="btn-outline btn-sm">Directions</a>

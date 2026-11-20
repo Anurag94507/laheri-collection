@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { trackOrder } from '../api/index.js';
+import { telHref, whatsappHref } from '../components/SendCodeLinks.jsx';
 import PageHero from '../components/PageHero.jsx';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { formatDateTime, formatINRDecimal, orderStatusSteps, prettyStatus } from '../utils/format.js';
@@ -160,14 +161,14 @@ export default function TrackOrder() {
 
               <div className="mt-6 flex flex-wrap gap-3 border-t border-navy/10 pt-5">
                 <a
-                  href={`https://wa.me/91${settings?.shop?.whatsapp}?text=${encodeURIComponent(`Hello, I need help with order ${order.orderId}.`)}`}
+                  href={whatsappHref(settings?.shop?.whatsapp, `Hello, I need help with order ${order.orderId}.`)}
                   target="_blank"
                   rel="noreferrer"
                   className="btn-navy btn-sm"
                 >
                   <IconWhatsApp size={14} /> Ask about this order
                 </a>
-                <a href={`tel:+91${settings?.shop?.phone}`} className="btn-outline btn-sm">Call shop</a>
+                <a href={telHref(settings?.shop?.phone)} className="btn-outline btn-sm">Call shop</a>
               </div>
             </div>
           </div>

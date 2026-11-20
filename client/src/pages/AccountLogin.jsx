@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   customerPasswordLogin,
+  getSettings,
   requestOtp,
   resetCustomerPassword,
   verifyOtp,
 } from '../api/index.js';
 import { loadBagIntoCart, useCustomer } from '../store/customer.js';
+import { whatsappHref } from '../components/SendCodeLinks.jsx';
 import { toast } from '../store/toast.js';
 import { IconCheck, IconLock, IconMail, IconPhone, IconWhatsApp } from '../components/Icons.jsx';
 
@@ -35,6 +37,13 @@ export default function AccountLogin() {
   const [relay, setRelay] = useState(false);
   const [busy, setBusy] = useState(false);
   const [name, setName] = useState(''); // Customer name
+  const [shopWhatsapp, setShopWhatsapp] = useState('');
+
+  useEffect(() => {
+    getSettings()
+      .then((settings) => setShopWhatsapp(settings?.shop?.whatsapp || ''))
+      .catch(() => undefined);
+  }, []);
 
   const isEmail = identifier.includes('@');
 
@@ -58,7 +67,7 @@ export default function AccountLogin() {
         purpose: purposes,
       });
       setDevCode(result.devCode || '');
-      setRelay(!result.senderConfigured);
+      setRelay(!result.delivered);
       setCode('');
       setStep('code');
       toast.success(result.message || 'Code sent.');
@@ -278,7 +287,13 @@ export default function AccountLogin() {
                   )}
 
                   <button type="submit" disabled={busy} className="btn-navy w-full disabled:opacity-60">
-                    {busy ? 'Sending…' : mode === 'reset' ? 'Send reset code' : 'Send OTP'}
+                    {busy
+                      ? 'Getting your code…'
+                      : mode === 'reset'
+                        ? 'Send reset code'
+                        : isEmail
+                          ? 'Send code by email'
+                          : `Send code on ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'}`}
                   </button>
                   <p className="text-center text-[11px] text-ink/40">
                     No password needed — we send a 6-digit code each time.
@@ -291,6 +306,16 @@ export default function AccountLogin() {
                       <>
                         Ask the shop on WhatsApp for the code for{' '}
                         <span className="font-semibold text-navy">{identifier}</span> — it is ready now and lasts 5 minutes.
+                        {shopWhatsapp && (
+                          <a
+                            href={whatsappHref(shopWhatsapp, `Namaste! Please send my Laheri Collection login code for ${identifier}.`)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-[#25D366]/15 px-3 py-2 text-[11px] font-semibold text-[#0F7B6C]"
+                          >
+                            <IconWhatsApp size={14} /> Message the shop on WhatsApp
+                          </a>
+                        )}
                       </>
                     ) : (
                       <>

@@ -3,6 +3,7 @@ import { getAdminAccounts, getAdminBags, getCustomers } from '../../api/index.js
 import { toast } from '../../store/toast.js';
 import { formatINR } from '../../utils/format.js';
 import { IconBag, IconDownload, IconSearch, IconUser } from '../../components/Icons.jsx';
+import SendCodeLinks from '../../components/SendCodeLinks.jsx';
 
 const SEGMENTS = [
   { value: 'all', label: 'Everyone' },
@@ -136,7 +137,10 @@ export default function Customers() {
                       <p className="font-medium text-navy">{customer.name}</p>
                       <p className="text-[10px] text-ink/35">{customer.email || '—'}</p>
                     </td>
-                    <td className="px-3 py-2.5 font-mono text-[11px] text-ink/55">{customer.mobile}</td>
+                    <td className="px-3 py-2.5">
+                      <p className="font-mono text-[11px] text-ink/55">{customer.mobile}</p>
+                      <SendCodeLinks mobile={customer.mobile} name={customer.name} className="mt-1" />
+                    </td>
                     <td className="px-3 py-2.5 text-ink/50">{customer.city || '—'}</td>
                     <td className="px-3 py-2.5">{customer.totalOrders || 0}</td>
                     <td className="px-3 py-2.5 font-medium text-navy">{formatINR(customer.totalSpend || 0)}</td>
@@ -224,7 +228,10 @@ export default function Customers() {
                 {accounts.map((account) => (
                   <tr key={account._id}>
                     <td className="px-5 py-2.5 font-medium text-navy">{account.name || '—'}</td>
-                    <td className="px-3 py-2.5 font-mono text-[11px] text-ink/55">{account.mobile || '—'}</td>
+                    <td className="px-3 py-2.5">
+                      <p className="font-mono text-[11px] text-ink/55">{account.mobile || '—'}</p>
+                      {account.mobile && <SendCodeLinks mobile={account.mobile} name={account.name} className="mt-1" />}
+                    </td>
                     <td className="px-3 py-2.5 text-ink/50">{account.email || '—'}</td>
                     <td className="px-3 py-2.5">{account.orders}</td>
                     <td className="px-3 py-2.5 font-medium text-navy">{formatINR(account.spend)}</td>
